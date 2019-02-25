@@ -15,6 +15,5 @@ module.exports = {
             , author = call.message.author
 
 
-            if(bot.)
     }
 }

@@ -8,14 +8,17 @@ const Discord = require("discord.js")
     , fs = require("fs")
     , DBL = require('dblapi.js')
     , moment = require("moment")
-    //, Twitch = TwitchPKG()
-    //,  dbl = new DBL('Your discordbots.org token', client);
+//, Twitch = TwitchPKG()
+//,  dbl = new DBL('Your discordbots.org token', client);
 //#endregion
 //#region Variable
 
 //BOT VARIABLE
+const Util = require("./Util")
+
 bot.config = config
 bot.moment = moment
+
 
 //#endregion
 //#region Data Connection
@@ -40,16 +43,25 @@ bot.once("ready", () => {
     }
 
     console.log(colors.blue("The bot is now ready !"))
-    setTimeout(ChangeState1, 15000);
+    setTimeout(ChangeState1, 60000);
 })
 
 //#region DBL API 
 
 //#endregion
 
+bot.on("guildCreate", async guild => {
+    bot.con.query(`INSERT INTO ${bot.DB_Model} (servername, serverid, prefix, lang, welcome_status) VALUES (?, ?, ?, ?, ?)`, [guild.name, guild.id, config.prefix, "english", false], (err, results) => {
+        if (err) console.log(err);
+        console.log("Inserted the new server !");
+    });
+})
+
+
 bot.on("message", async message => {
     if (message.author.bot) return;
-    if (bot.config.bannedUsers.includes(message.author.ID)) return console.log(`'${message.author.tag}' is a banned user`);
+    console.log(Util.SQL_getBanInfo)
+    //if (Util.SQL_getBanInfo.includes(message.author.ID)) return console.log(`'${message.author.tag}' is a banned user`);
 
     //#region Bot Permissions
     bot.BOT_SEND_MESSAGESPerm = await message.guild.channels.find(c => c.id === message.channel.id).permissionsFor(message.guild.me).has("SEND_MESSAGES") && message.channel.type === 'text'
@@ -152,7 +164,8 @@ function ChangeState2() {
         time_string = `${time.get("seconds")} ${time_var.s}.`
     }
 
-    bot.user.setActivity(`${bot.config.prefix}help | Launched since`)
+    console.log(time_string)
+    bot.user.setActivity(`${bot.config.prefix}help | Launched since ${time_string}`)
 
     setTimeout(async () => { ChangeState1() }, 60000);
 }
