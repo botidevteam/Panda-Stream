@@ -51,7 +51,7 @@ bot.once("ready", () => {
 //#endregion
 
 bot.on("guildCreate", async guild => {
-    bot.con.query(`INSERT INTO ${bot.DB_Model} (servername, serverid, prefix, lang) VALUES (?, ?, ?, ?, ?)`, [guild.name, guild.id, config.prefix, "english"], (err, results) => {
+    bot.con.query(`INSERT INTO ${bot.DB_Model} (ServerName, ServerID, ServerPrefix, ServerLang) VALUES (?, ?, ?, ?, ?)`, [guild.name, guild.id, config.prefix, "english"], (err, results) => {
         if (err) console.log(err);
         console.log("Inserted the new server !");
     });
