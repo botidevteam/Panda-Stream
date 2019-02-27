@@ -7,14 +7,14 @@ module.exports = {
      * @param returns The result of the request
      */
     function(model, get_where, message, member) {
-        const bot = require("../bot")
+        const bot = require("../bot").bot
             , Util = require("../Util")
-
+            
         return new Promise((resolve, reject) => {
             bot.con.query(`SELECT * FROM ${model} WHERE ${get_where} = '${message.guild.id}'`, (err, results) => {
                 if (!err) {
                     if (results == null) {
-                        Util.SQL_Insert_NewServer(member);
+                        //Util.SQL_Insert_NewServer(member);
                         resolve();
                     } else resolve(results[0]);
                 } else reject(err);

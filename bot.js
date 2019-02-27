@@ -21,27 +21,34 @@ bot.moment = moment
 
 
 //#endregion
+
 //#region Data Connection
-bot.login(bot.config.token)
+bot.login(config.token)
 
 bot.con = mysql.createPool({
-    host: bot.config.MySQL_host,
-    user: bot.config.MySQL_user,
-    database: bot.config.MySQL_database,
-    password: bot.config.MySQL_password
+    host: config.MySQL_host,
+    user: config.MySQL_user,
+    database: config.MySQL_database,
+    password: config.MySQL_password
 });
 //#endregion
 
 bot.once("ready", () => {
-    console.log(colors.green("---------------------------------\n" + bot.config.prefixLog + " Bot created by BotiDevTeam\n" + bot.config.prefixLog + " All rights are Reserved\n" + bot.config.prefixLog + " The bot is ready\n---------------------------------"))
+    console.log(
+        colors.green("---------------------------------\n" +
+            `${config.prefixLog} Bot created by BotiDevTeam\n` +
+            `${config.prefixLog} All rights are Reserved\n` +
+            `${config.prefixLog} The bot is ready\n` +
+            "---------------------------------"))
     //--------------------------
     bot.user.setStatus("online")
-    bot.user.setActivity(`${bot.config.prefix}help | Started and ready !`)
+    bot.user.setActivity(`${config.prefix}help | Started and ready!`)
 
     for (var i in bot.guilds.array()) {
         console.log(`Server number ${i} » '${bot.guilds.array()[i]}'`)
     }
-
+    Util.SQL_Instance_Erase()
+    bot.StreamInterval()
     console.log(colors.blue("The bot is now ready !"))
     setTimeout(ChangeState1, 60000);
 })
@@ -51,7 +58,7 @@ bot.once("ready", () => {
 //#endregion
 
 bot.on("guildCreate", async guild => {
-    bot.con.query(`INSERT INTO ${bot.DB_Model} (ServerName, ServerID, ServerPrefix, ServerLang) VALUES (?, ?, ?, ?, ?)`, [guild.name, guild.id, config.prefix, "english"], (err, results) => {
+    bot.con.query(`INSERT INTO ${bot.DB_Model} (ServerName, ServerID, ServerPrefix, ServerLang) VALUES (?, ?, ?, ?)`, [guild.name, guild.id, config.prefix, "english"], (err, results) => {
         if (err) console.log(err);
         console.log("Inserted the new server !");
     });
@@ -60,8 +67,8 @@ bot.on("guildCreate", async guild => {
 
 bot.on("message", async message => {
     if (message.author.bot) return;
-    console.log(Util.SQL_getBanInfo)
-    //if (Util.SQL_getBanInfo.includes(message.author.ID)) return console.log(`'${message.author.tag}' is a banned user`);
+    console.log(Util.SQL_getBanInfo(message.author.id))
+    //if (Util.SQL_getBanInfo(message.author.id).includes(message.author.id)) return console.log(`'${message.author.tag}' is a banned user`);
 
     //#region Bot Permissions
     bot.BOT_SEND_MESSAGESPerm = await message.guild.channels.find(c => c.id === message.channel.id).permissionsFor(message.guild.me).has("SEND_MESSAGES") && message.channel.type === 'text'
@@ -72,6 +79,7 @@ bot.on("message", async message => {
     //#endregion
 
     //#region User Permissions
+    bot.member_Has_ADMINISTRATOR = await message.guild.channels.find(c => c.id === message.channel.id).permissionsFor(message.member).has("ADMINISTRATOR") && message.channel.type === 'text'
     bot.member_Has_BAN_MEMBERS = await message.guild.channels.find(c => c.id === message.channel.id).permissionsFor(message.member).has("BAN_MEMBERS") && message.channel.type === 'text'
     bot.member_Has_KICK_MEMBERS = await message.guild.channels.find(c => c.id === message.channel.id).permissionsFor(message.member).has("KICK_MEMBERS") && message.channel.type === 'text'
     bot.member_Has_MANAGE_GUILD = await message.guild.channels.find(c => c.id === message.channel.id).permissionsFor(message.member).has("MANAGE_GUILD") && message.channel.type === 'text'
@@ -79,13 +87,21 @@ bot.on("message", async message => {
     bot.member_has_MANAGE_CHANNELS = await message.guild.channels.find(c => c.id === message.channel.id).permissionsFor(message.member).has("MANAGE_CHANNELS") && message.channel.type === 'text'
     //#endregion
 
-    const prefix = await bot.config.prefix,
-        cmd = await message.content.slice(bot.config.prefix.length).trim().split(/ +/g).shift(),
-        args = await message.content.slice(bot.config.prefix.length).trim().split(/ +/g).join(" ").slice(cmd.length + 1).split(" "),
-        //cmd = message.content.slice(bot.config.prefix.length).trim().split(/ +/g),
+    const prefix = await config.prefix,
+        cmd = await message.content.slice(config.prefix.length).trim().split(/ +/g).shift(),
+        args = await message.content.slice(config.prefix.length).trim().split(/ +/g).join(" ").slice(cmd.length + 1).split(" "),
+        //cmd = message.content.slice(config.prefix.length).trim().split(/ +/g),
         content = await args.join(" ");
 
     if (message.content.startsWith(prefix) && !message.author.bot) {
+        if (message.channel.topic)
+            if (String(message.channel.topic).toLowerCase().includes(":nocmds:")) {
+                if (!bot.member_Has_ADMINISTRATOR) {
+                    message.author.send(`This channel have a \`:Nocmds:\` tag and you not allowed to send commands in this channel`);
+                    return message.delete(1250);
+                }
+            }
+
         const commandFile = bot.commands.find((command) => (command.help.aliases || []).concat([command.help.name]).includes(cmd));
         if (commandFile != null) {
             if (message.channel.type !== "dm" || (commandFile.help.dm || false)) {
@@ -103,7 +119,7 @@ bot.StreamInterval = async function () {
         for (var i_m in guild.members.array()) {
             m = guild.members.array()[i_m]
 
-            console.log(m.presence)
+            //console.log(m.presence)
             if (!m.presence) return;
             if (!m.presence.status) return;
 
@@ -117,13 +133,12 @@ bot.StreamInterval = async function () {
 
 //#region State change
 function ChangeState1() {
-    bot.user.setActivity(`${bot.config.prefix}help | Developed by BotiDevTeam`)
-    //Vous avez besoin d'aide?
+    bot.user.setActivity(`${config.prefix}help | Developed by BotiDevTeam`)
     setTimeout(async () => { ChangeState2() }, 60000);
 }
 
 function ChangeState2() {
-    var time = bot.moment.duration(bot.uptime, "milliseconds");
+    var time = moment.duration(bot.uptime, "milliseconds");
     var time_string;
     let time_var = {
         d: "",
@@ -165,7 +180,7 @@ function ChangeState2() {
     }
 
     console.log(time_string)
-    bot.user.setActivity(`${bot.config.prefix}help | Launched since ${time_string}`)
+    bot.user.setActivity(`${config.prefix}help | Launched since ${time_string}`)
 
     setTimeout(async () => { ChangeState1() }, 60000);
 }

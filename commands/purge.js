@@ -5,55 +5,62 @@ module.exports = {
     run: async (call) => {
         const Discord = require("discord.js")
             , bot = require("../bot").bot
-            , Call = require("../bot").Call
             , Util = require("../Util")
 
         var message = call.message
-            , user = call.message.member
+            , member = call.message.member
             , author = call.message.author
+            , queue_String = []
+            , delete_msg
 
-        if (bot.BOT_MANAGE_MESSAGESPerm) {
-            if (!call.args[0]) {
-                message.reply(`Please, describe a number to purge`).then(function (msg) {
-                    call.bot.deleteMyMessage(msg, 6000);
-                })
-                return;
+        if (!call.args[0]) return message.reply(`Please, describe a number to purge`)
+            .then(msg => { Util.deleteMyMessage(msg, 6 * 1000) })
 
-            } else if (!parseInt(NumberToDelete)) {
-                //console.log("pas un int")
-                message.reply("This is not a number").then(msg => {
-                    call.bot.deleteMyMessage(msg, 9 * 1000)
+        let NumberToDelete = call.args[0]
+
+        if (!parseInt(NumberToDelete)) return message.reply("This is not a number")
+            .then(msg => { Util.deleteMyMessage(msg, 9 * 1000) })
+
+        if (!call.bot.BOT_MANAGE_MESSAGESPerm) return message.reply("I need the permission 'MANAGE_MESSAGES' to do that")
+            .then(msg => { return Util.deleteMyMessage(msg, 15 * 1000) })
+
+        if (!call.bot.member_has_MANAGE_MESSAGES) return message.reply("You need the 'MANAGE_MESSAGES' permissions use that command")
+            .then(msg => { Util.deleteMyMessage(msg, 8 * 1000) })
+
+        if (NumberToDelete <= 0) return message.reply("This can't be a number egal or less than 0")
+            .then(msg => { Util.deleteMyMessage(msg, 5 * 1000) })
+        else if (NumberToDelete >= 100) NumberToDelete = 100
+
+        await message.react(Util.EmojiGreenTickString)
+        await message.delete(2000)
+
+        setTimeout(async () => {
+            message.channel.fetchMessages({ limit: NumberToDelete })
+                .then(async messages => {
+                    messages.forEach(msg => {
+                        queue_String.push(msg)
+                    });
+                    message.channel.send(`${Util.EmojiGreenTickString} Deleting ${NumberToDelete} messages`).then(msg => delete_msg = msg)
+                    console.log(queue_String)
+
+                    setTimeout(async () => {
+                        queueMsg()
+                    }, 2500);
                 })
-                return;
+                .catch(err => {
+                    console.log(err)
+                    message.channel.send(Util.errorMessage(err, "purge"))
+                })
+        }, 2250);
+
+        async function queueMsg() {
+            console.log(queue_String.length)
+            while (queue_String.length != 0) {
+                var msg = queue_String.shift()
+                if (!msg.pinned && msg.deletable) await msg.delete()
+                    .then(async () => await delete_msg.edit(`${Util.EmojiGreenTickString} Deleted ${NumberToDelete - queue_String.length} messages`))
             }
-
-            if (!call.bot.BOT_MANAGE_MESSAGESPerm) {
-                message.reply(call.bot.current_lang.Command_Bot_Need_Permission_Manage_Messages).then(function (msg) {
-                    call.bot.deleteMyMessage(msg, 15 * 1000)
-                });
-                return;
-
-            } else if (NumberToDelete <= 0) {
-                message.reply(call.bot.current_lang.Command_Purge_Need_Number).then(function (msg) {
-                    call.bot.deleteMyMessage(msg, 5000);
-                })
-                return;
-
-            } else if (NumberToDelete > 100) {
-                message.reply(call.bot.current_lang.Command_Purge_Max_100_Message_Delete).then(function (msg) {
-                    call.bot.deleteMyMessage(msg, 6000);
-                })
-                return;
-
-            } else if (!call.bot.member_has_MANAGE_MESSAGES) {
-                message.reply(call.bot.current_lang.Command_User_Need_Permission_Manage_Messages).then(function (msg) {
-                    call.bot.deleteMyMessage(msg, 7000);
-                })
-                return;
-            }
-            message.react(call.bot.EmojiGreenTick)
-        } else {
-            message.reply("I need the 'MANAGE_MESSAGES' permissions use that command.").then(msg => { Util.deleteMyMessage(msg, 8000) })
+            await delete_msg.edit(`${Util.EmojiGreenTickString} Deleted all the requested messages!\n\nRequested by ${Util.NotifyUser(message.author.id)}`)
         }
     }
 }
