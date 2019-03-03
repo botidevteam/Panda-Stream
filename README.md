@@ -16,4 +16,4 @@ French | Nobody | 0%
 Russian | Nobody | 0%
 
 Join our discord support server 
-<iframe src="https://discordapp.com/widget?id=548144782023852092&theme=dark" width="128" height="128" allowtransparency="true" frameborder="0"></iframe>
+<iframe src="https://discordapp.com/widget?id=548144782023852092&theme=dark" width="350" height="500" allowtransparency="true" frameborder="0"></iframe>
