@@ -1,6 +1,6 @@
 module.exports = {
     help: {
-        //What the command will look || =addBannedUsers
+        //What the command will look || =removeBannedUsers
         name: "removeBannedUsers",
         aliases: ["remBU"]
     },

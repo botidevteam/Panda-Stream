@@ -1,6 +1,6 @@
 {
-  "name": "botistream",
-  "description": "A brand new bot for streaming users",
+  "name": "pandastream",
+  "description": "A brand new bot for discord streaming users",
   "version": "0.1.0",
   "main": "bot.js",
   "scripts": {

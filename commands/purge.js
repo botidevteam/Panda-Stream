@@ -41,7 +41,7 @@ module.exports = {
                         queue_String.push(msg)
                     });
                     message.channel.send(`${Util.EmojiGreenTickString} Deleting ${NumberToDelete} messages`).then(msg => delete_msg = msg)
-                    console.log(queue_String)
+                    //console.log(queue_String)
 
                     setTimeout(async () => {
                         queueMsg()
@@ -54,7 +54,7 @@ module.exports = {
         }, 2250);
 
         async function queueMsg() {
-            console.log(queue_String.length)
+            //console.log(queue_String.length)
             while (queue_String.length != 0) {
                 var msg = queue_String.shift()
                 if (!msg.pinned && msg.deletable) await msg.delete()

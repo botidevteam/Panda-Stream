@@ -16,6 +16,11 @@ const Discord = require("discord.js")
 //BOT VARIABLE
 const Util = require("./Util")
 
+const twitch = new TwitchPKG({
+    id: config.twitch_id,
+    secret: config.twitch_secret
+})
+
 bot.config = config
 bot.moment = moment
 
@@ -25,12 +30,13 @@ bot.moment = moment
 //#region Data Connection
 bot.login(config.token)
 
-bot.con = mysql.createPool({
+const con = mysql.createPool({
     host: config.MySQL_host,
     user: config.MySQL_user,
     database: config.MySQL_database,
     password: config.MySQL_password
 });
+bot.con = con;
 //#endregion
 
 bot.once("ready", () => {
@@ -42,15 +48,21 @@ bot.once("ready", () => {
             "---------------------------------"))
     //--------------------------
     bot.user.setStatus("online")
-    bot.user.setActivity(`${config.prefix}help | Started and ready!`)
+    bot.user.setActivity(`${config.prefix}help | Started and ready!`, { type: "STREAMING", url: "https://twitch.tv/RisedSky_FR" })
 
     for (var i in bot.guilds.array()) {
         console.log(`Server number ${i} » '${bot.guilds.array()[i]}'`)
     }
-    Util.SQL_Instance_Erase()
-    bot.StreamInterval()
+
+    Util.SQL_Instance_Erase() //Delete all the data from the instance table
+
+    setInterval(async () => {
+        StreamInterval()
+    }, 5000);
+
     console.log(colors.blue("The bot is now ready !"))
     setTimeout(ChangeState1, 60000);
+    //Util.startupsite()
 })
 
 //#region DBL API 
@@ -58,12 +70,14 @@ bot.once("ready", () => {
 //#endregion
 
 bot.on("guildCreate", async guild => {
-    bot.con.query(`INSERT INTO ${bot.DB_Model} (ServerName, ServerID, ServerPrefix, ServerLang) VALUES (?, ?, ?, ?)`, [guild.name, guild.id, config.prefix, "english"], (err, results) => {
-        if (err) console.log(err);
-        console.log("Inserted the new server !");
-    });
-})
+    bot.con.query(`SELECT * FROM ${Util.db_Model.servers} WHERE ServerID = '${guild.id}`, (error, res) => {
+        if (error) bot.con.query(`INSERT INTO ${Util.db_Model.servers} (ServerName, ServerID, ServerPrefix, ServerLang) VALUES (?, ?, ?, ?)`, [guild.name, guild.id, config.prefix, "english"], (err, results) => {
+            if (err) console.log(err);
+            console.log("Inserted the new server !");
+        });
+    })
 
+})
 
 bot.on("message", async message => {
     if (message.author.bot) return;
@@ -87,32 +101,74 @@ bot.on("message", async message => {
     bot.member_has_MANAGE_CHANNELS = await message.guild.channels.find(c => c.id === message.channel.id).permissionsFor(message.member).has("MANAGE_CHANNELS") && message.channel.type === 'text'
     //#endregion
 
-    const prefix = await config.prefix,
-        cmd = await message.content.slice(config.prefix.length).trim().split(/ +/g).shift(),
-        args = await message.content.slice(config.prefix.length).trim().split(/ +/g).join(" ").slice(cmd.length + 1).split(" "),
-        //cmd = message.content.slice(config.prefix.length).trim().split(/ +/g),
-        content = await args.join(" ");
+    Util.SQL_GetResult(Util.db_Model.servers, "ServerID", message, message.member).then(async results => {
+        if (results == null || results == undefined || results == "") return
+        /**
+         * @param results.ServerID The server ID
+         * @param results.ServerLang The server lag
+         * @param results.ServerName The server name
+         * @param results.ServerOwnerID The server owner ID
+         * @param results.ServerPrefix The server prefix
+         */
 
-    if (message.content.startsWith(prefix) && !message.author.bot) {
-        if (message.channel.topic)
-            if (String(message.channel.topic).toLowerCase().includes(":nocmds:")) {
-                if (!bot.member_Has_ADMINISTRATOR) {
-                    message.author.send(`This channel have a \`:Nocmds:\` tag and you not allowed to send commands in this channel`);
-                    return message.delete(1250);
+        //const prefix = await config.prefix
+        const prefix = await results.ServerPrefix
+            //, cmd = await message.content.slice(config.prefix.length).trim().split(/ +/g).shift()
+            //, args = await message.content.slice(config.prefix.length).trim().split(/ +/g).join(" ").slice(cmd.length + 1).split(" ")
+            , cmd = await message.content.slice(results.ServerPrefix.length).trim().split(/ +/g).shift()
+            , args = await message.content.slice(results.ServerPrefix.length).trim().split(/ +/g).join(" ").slice(cmd.length + 1).split(" ")
+            //, cmd = message.content.slice(config.prefix.length).trim().split(/ +/g)
+            , content = await args.join(" ");
+
+        if (message.channel.topic && String(message.channel.topic).includes(":ideas:")) {
+            message.react(Util.EmojiGreenTickString)
+            message.react(Util.EmojiRedTickString)
+        }
+
+        if (message.content.startsWith(prefix) && !message.author.bot) {
+            if (message.channel.topic)
+                if (String(message.channel.topic).toLowerCase().includes(":nocmds:")) {
+                    if (!bot.member_Has_ADMINISTRATOR) {
+                        message.author.send(`The channnel ${Util.NotifyChannel(message.channel.id)} have a \`:nocmds:\` tag and you not allowed to send any commands in this channel.`);
+                        return message.delete(1250);
+                    }
                 }
+
+            const commandFile = bot.commands.find((command) => (command.help.aliases || []).concat([command.help.name]).includes(cmd));
+            if (commandFile != null) {
+                if (message.channel.type !== "dm" || (commandFile.help.dm || false)) {
+                    commandFile.run(new Call(message, bot, bot.commands, args, content, prefix, cmd));
+                } else message.reply("This command is not working in DM.").catch(() => { });
             }
 
-        const commandFile = bot.commands.find((command) => (command.help.aliases || []).concat([command.help.name]).includes(cmd));
-        if (commandFile != null) {
-            if (message.channel.type !== "dm" || (commandFile.help.dm || false)) {
-                commandFile.run(new Call(message, bot, bot.commands, args, content, prefix, cmd));
-            } else message.reply("This command is not working in DM.").catch(() => { });
+            //IF THE COMMAND IS FROM THE DEFAULT PREFIX THEN
+        } else if (message.content.startsWith(config.prefix) && !message.author.bot) {
+            if (message.channel.topic)
+                if (String(message.channel.topic).toLowerCase().includes(":nocmds:")) {
+                    if (!bot.member_Has_ADMINISTRATOR) {
+                        message.author.send(`The channnel ${Util.NotifyChannel(message.channel.id)} has a \`:nocmds:\` tag and you not allowed to send any commands in this channel.`);
+                        return message.delete(1250);
+                    }
+                }
+            const commandFile = bot.commands.find((command) => (command.help.aliases || []).concat([command.help.name]).includes(cmd));
+            if (commandFile != null) {
+                if (message.channel.type !== "dm" || (commandFile.help.dm || false)) {
+                    commandFile.run(new Call(message, bot, bot.commands, args, content, config.prefix, cmd));
+                } else message.reply("This command is not working in DM.").catch(() => { });
+            }
         }
-    }
+    })
 })
 
 //#region All functions
-bot.StreamInterval = async function () {
+async function StreamInterval() {
+    Util.Verify_Stream_Table()
+    /*
+    Util.SQL_Instance_AddAnnouced()
+    Util.SQL_Instance_AddDeleted()
+    Util.SQL_Instance_AddGood()
+    Util.SQL_Instance_AddError()
+    */
     for (var i_g in bot.guilds.array()) {
         let guild = bot.guilds.array()[i_g]
 
@@ -133,7 +189,7 @@ bot.StreamInterval = async function () {
 
 //#region State change
 function ChangeState1() {
-    bot.user.setActivity(`${config.prefix}help | Developed by BotiDevTeam`)
+    bot.user.setActivity(`${config.prefix}help | Developed by BotiDevTeam`, { type: "STREAMING", url: "https://twitch.tv/RisedSky_FR" })
     setTimeout(async () => { ChangeState2() }, 60000);
 }
 
@@ -179,14 +235,16 @@ function ChangeState2() {
         time_string = `${time.get("seconds")} ${time_var.s}.`
     }
 
-    console.log(time_string)
-    bot.user.setActivity(`${config.prefix}help | Launched since ${time_string}`)
+    //console.log(time_string)
+    bot.user.setActivity(`${config.prefix}help | Launched since ${time_string}`, { type: "STREAMING", url: "https://twitch.tv/RisedSky_FR" })
 
     setTimeout(async () => { ChangeState1() }, 60000);
 }
 
 //#endregion
 
+
+//#endregion
 //#region Command Handler
 bot.commands = new Discord.Collection();
 bot.disabledCommands = [];
@@ -234,4 +292,4 @@ class Call {
 //#endregion
 //#endregion
 
-module.exports = { bot, Call }
+module.exports = { bot, Call, con, twitch }

@@ -14,9 +14,6 @@ module.exports = {
         let coins = Util.SQL_GetUserStats(author.id);
 
         //:lulz: - 549654952457404416
-        let emoji = bot.emojis.find(e => e.id == "549654952457404416");
-        if(!emoji) return message.channel.send(`Error\nThere is no emoji with this ID`)
-        message.react(emoji);
         let embed = new discord.RichEmbed()
             .setDescription('Profile')
             .setColor('#c8385a')
