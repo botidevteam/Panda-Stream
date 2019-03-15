@@ -69,6 +69,7 @@ module.exports = {
     //#endregion
     //#endregion
 
+    Verify_New_Streamers: require("./functions/Verify_New_Streamers").function,
     Verify_Stream_Table: require("./functions/Verify_Stream_Table").function,
     startupsite: require("./functions/startupsite").function,
     notAllowedCommand: require("./functions/notAllowedCommand").function,

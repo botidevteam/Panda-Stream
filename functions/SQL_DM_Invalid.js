@@ -36,6 +36,7 @@ module.exports = {
         const user = bot.bot.users.find(u => u.id == DM_UserID)
         if (user) user.createDM()
             .then(c => {
+                console.log(`Sended invalid DM value '${Invalid_Value}' to ${user.tag}`)
                 c.send(embed)
             })
 

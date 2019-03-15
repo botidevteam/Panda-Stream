@@ -4,7 +4,7 @@ module.exports = {
             , Util = require("../Util")
             , colors = require("colors")
 
-        bot.con.query(`SELECT * FROM ${Util.db_Model.users} ORDER BY IS_STREAMING DESC, ID ASC`, (error_users, results_users) => {
+        bot.con.query(`SELECT * FROM ${Util.db_Model.users} ORDER BY IS_STREAMING ASC, ID ASC`, (error_users, results_users) => {
             /**
              * @param results_users.UserID
              * @param results_users.UserTwitch
@@ -18,61 +18,40 @@ module.exports = {
 
             if (error_users) console.error(error_users);
 
-            const Streaming_User = []
+            const Check_Streaming_User = []
+
             results_users.forEach(i_u => {
-                if (i_u.IS_STREAMING) Streaming_User.push(i_u)
+                if (!i_u.IS_STREAMING) Check_Streaming_User.push(i_u)
             });
 
-            if (Streaming_User == "" || Streaming_User == null || Streaming_User == undefined) return //console.log(`Nothing in the Streaming_User`)
+            if (Check_Streaming_User == "" || Check_Streaming_User == null || Check_Streaming_User == undefined) return //console.log(`Nothing in the Streaming_User`)
             //Will prevent any call in the db for nothing if nobody is streaming
 
+            //console.log(Check_Streaming_User)
 
-            //console.log(colors.green(Streaming_User)
-            //console.log(colors.green(results)
+            Check_Streaming_User.forEach(i_u => {
+                if (i_u == "" || i_u == null || i_u == undefined) return
+                if (i_u.ServerID == null || i_u.ChannelID == null) return
 
-            bot.con.query(`SELECT * FROM ${Util.db_Model.queue}`, (error_queue, results_queue) => {
-                /**
-                * @param results_queue.UserID
-                * @param results_queue.UserTwitch
-                * @param results_queue.ServerID
-                * @param results_queue.ChannelID
-                * @param results_queue.Stream_Text
-                * @param results_queue.Remove_MSG_On_End
-                * @param results_queue.IS_STREAMING
-                * @param results_queue.COINS
-                */
-
-                if (error_queue) console.error(error_queue)
-
-                //console.log(colors.green("---  results_queue  ---")
-                //console.log(colors.green(results_queue)
-                //console.log(colors.green("---  results_queue  ---\n\n")
-
-                if (results_queue == "" || results_queue == null || results_queue == undefined) {
-                    //console.log(colors.green("NULL -> y'a rien donc on ajoute")
-                    Streaming_User.forEach(i_u => {
-                        if (i_u == "" || i_u == null || i_u == undefined) return
-                        if (i_u.ServerID == null || i_u.ChannelID == null) return
-
-                        addUser(i_u)
-                    });
-                } else {
-                    //console.log("NON NULL")
-
-                    Streaming_User.forEach(r_u => {
-                        //console.log(colors.green(r_u.UserID)
-                        SelectAll(r_u.UserID).then(result => {
-                            if (!result) {
-                                //console.log(colors.green("pas result")
-                                addUser(r_u)
-                            } else {
-                                //console.log(colors.green(`result=${result}`)
-                                Verify_Twitch_Status(result)
-                            }
-                        })
-                    })
-                }
+                //addUser(i_u)
+                //addUser(i_u)
             });
+            //console.log("NON NULL")
+
+
+            Check_Streaming_User.forEach(r_u => {
+                //console.log(colors.green(r_u.UserID)
+                SelectAll_Users(r_u.UserID)
+                    .then(result => {
+                        if (result) {
+                            //console.log(colors.green(`result`))
+                            //console.log(result)
+                            Verify_Twitch_Status(result)
+                        }
+                    })
+            })
+
+
 
         });
 
@@ -84,11 +63,38 @@ module.exports = {
                 Streaming_User.ChannelID,
                 Streaming_User.Stream_Text,
                 Streaming_User.Remove_MSG_On_End,
-                Streaming_User.IS_STREAMING
+                '1'
                 ])
         }
 
-        function SelectAll(UserID) {
+        function SelectAll_Users(UserID) {
+            /**
+             * @param UserID The UserID
+             * @param returns 
+             */
+            return new Promise(async (resolve, reject) => {
+                bot.con.query(`SELECT * FROM ${Util.db_Model.users} WHERE UserID = ${UserID}`, (err, results) => {
+                    /**
+                    * @param results.UserID
+                    * @param results.UserTwitch
+                    * @param results.ServerID
+                    * @param results.ChannelID
+                    //* @param results.MessageID
+                    * @param results.Stream_Text
+                    * @param results.Remove_MSG_On_End
+                    * @param results.IS_STREAMING
+                    * @param results.COINS
+                    */
+                    if (!err) {
+                        if (results == null) {
+                            resolve();
+                        } else resolve(results[0]);
+                    } else reject(err);
+                });
+            });
+        }
+
+        function SelectAll_Queue(UserID) {
             /**
              * @param UserID The UserID
              * @param returns 
@@ -121,7 +127,7 @@ module.exports = {
              */
 
             bot.twitch.getUser(Streaming_User.UserTwitch)
-            //bot.twitch.getUser("squeezielive")
+                //bot.twitch.getUser("squeezielive")
                 .then(async data => {
                     const dataUser = await data;
 
@@ -129,12 +135,12 @@ module.exports = {
                     _id: 33166101328
                     average_fps: 60
                     broadcast_platform: "live"
-                        channel: Object { mature: false, status: "Squeezie ► La squad la plus éclatée du jeu (ft Loc…", broadcaster_language: "fr", … }
-                        status:"Squeezie ► La squad la plus éclatée du jeu (ft Locklear) #sponsorisé"
-                        updated_at:"2019-03-12T20:22:40.323794Z"
-                        url:"https://www.twitch.tv/squeezielive"
-                        video_banner:"https://static-cdn.jtvnw.net/jtv_user_pictures/1e3c5fd7-de47-4a59-bc94-50baa1572123-channel_offline_image-1920x1080.png"
-                        views: 11 554 222
+                    channel: Object { mature: false, status: "Squeezie ► La squad la plus éclatée du jeu (ft Loc…", broadcaster_language: "fr", … }
+                    status:"Squeezie ► La squad la plus éclatée du jeu (ft Locklear) #sponsorisé"
+                    updated_at:"2019-03-12T20:22:40.323794Z"
+                    url:"https://www.twitch.tv/squeezielive"
+                    video_banner:"https://static-cdn.jtvnw.net/jtv_user_pictures/1e3c5fd7-de47-4a59-bc94-50baa1572123-channel_offline_image-1920x1080.png"
+                    views: 11 554 222
                     community_id: ""
                     community_ids: Array(0)[]
                     created_at: "2019-03-12T18:55:38Z"
@@ -146,14 +152,14 @@ module.exports = {
                     viewers:8653
                     * */
 
-                    console.log(dataUser)
+                    //console.log(dataUser)
                     if (dataUser.stream == null || dataUser.stream == undefined) {
                         console.log(colors.green(`dataUser=NULL`))
                         return Delete_User_data_and_Streaming_Status(Streaming_User)
                     } else {
                         console.log(colors.green(`dataUser!=NULL`))
                         console.log(colors.green("il devrait stream normalement !"))
-
+                        console.log(colors.green(dataUser.stream.channel.name))
 
                         var guild_user = bot.bot.guilds.find(g => g.id == Streaming_User.ServerID)
                         if (!guild_user) {
@@ -182,6 +188,17 @@ module.exports = {
                         }
 
 
+                        SelectAll_Queue(Streaming_User.UserID)
+                            .then(result => {
+                                if (!result) {
+                                    //console.log(colors.green(`result`))
+                                    console.log(result)
+                                    //USED addUser(Streaming_User)
+                                    Add_User_data_and_Streaming_Status(Streaming_User)
+                                }
+                            })
+
+                        /*
                         if (!Streaming_User.MessageID) {
                             //Si le message de notif est PAS envoyé
 
@@ -208,6 +225,7 @@ module.exports = {
 
 
                         }
+                        */
 
                     }
                 })
@@ -217,16 +235,23 @@ module.exports = {
                 })
         }
 
-        function Delete_User_data_and_Streaming_Status(Streaming_User) {
-            console.log(colors.green(`Deleting the data of the user ${Streaming_User.UserID} - ${Streaming_User.UserTwitch}`))
-            bot.con.query(`UPDATE ${Util.db_Model.users} SET IS_STREAMING = '0' WHERE UserID = ${Streaming_User.UserID}`, (error) => {
+
+        function Add_User_data_and_Streaming_Status(Streaming_User) {
+            console.log(colors.green(`Adding the data of the user ${Streaming_User.UserID} - ${Streaming_User.UserTwitch}`))
+
+            bot.con.query(`UPDATE ${Util.db_Model.users} SET IS_STREAMING = '1' WHERE UserID = ${Streaming_User.UserID}`, (error) => {
                 if (error) console.error(error)
             })
 
+            addUser(Streaming_User)
+
+            /*
             bot.con.query(`DELETE FROM ${Util.db_Model.queue} WHERE UserTwitch = '${Streaming_User.UserTwitch}'`, (error) => {
                 if (error) console.error(error)
             })
+            */
 
+            /*
             if (Streaming_User.MessageID) {
                 console.log(colors.green(`Deleting the announced message of the channelID`))
 
@@ -240,6 +265,38 @@ module.exports = {
                         .catch(console.error);
                 }
             }
+            */
+        }
+
+        function Delete_User_data_and_Streaming_Status(Streaming_User) {
+            //console.log(colors.green(`Deleting the data of the user ${Streaming_User.UserID} - ${Streaming_User.UserTwitch}`))
+            /*
+            bot.con.query(`UPDATE ${Util.db_Model.users} SET IS_STREAMING = '${false}' WHERE UserID = '${Streaming_User.UserID}'`, (error) => {
+                if (error) console.error(error)
+            })
+            */
+
+            /*
+            bot.con.query(`DELETE FROM ${Util.db_Model.queue} WHERE UserTwitch = '${Streaming_User.UserTwitch}'`, (error) => {
+                if (error) console.error(error)
+            })
+            */
+
+            /*
+            if (Streaming_User.MessageID) {
+                console.log(colors.green(`Deleting the announced message of the channelID`))
+
+                var channel_user = bot.bot.channels.find(c => c.id == Streaming_User.ChannelID)
+                if (channel_user) {
+                    channel_user.fetchMessage(Streaming_User.MessageID)
+                        .then(async msg => {
+                            console.log(colors.green("Finded the msg"))
+                            msg.delete()
+                        })
+                        .catch(console.error);
+                }
+            }
+            */
         }
     }
 }

@@ -8,7 +8,6 @@ const Discord = require("discord.js")
     , fs = require("fs")
     , DBL = require('dblapi.js')
     , moment = require("moment")
-//, Twitch = TwitchPKG()
 //,  dbl = new DBL('Your discordbots.org token', client);
 //#endregion
 //#region Variable
@@ -57,8 +56,12 @@ bot.once("ready", () => {
     Util.SQL_Instance_Erase() //Delete all the data from the instance table
 
     setInterval(async () => {
-        StreamInterval()
+        Util.Verify_New_Streamers()
     }, 5000);
+
+    setInterval(async () => {
+        Util.Verify_Stream_Table()        
+    }, 10000);
 
     console.log(colors.blue("The bot is now ready !"))
     setTimeout(ChangeState1, 60000);
@@ -73,7 +76,7 @@ bot.on("guildCreate", async guild => {
     bot.con.query(`SELECT * FROM ${Util.db_Model.servers} WHERE ServerID = '${guild.id}`, (error, res) => {
         if (error) bot.con.query(`INSERT INTO ${Util.db_Model.servers} (ServerName, ServerID, ServerPrefix, ServerLang) VALUES (?, ?, ?, ?)`, [guild.name, guild.id, config.prefix, "english"], (err, results) => {
             if (err) console.log(err);
-            console.log("Inserted the new server !");
+            console.log(colors.green("Inserted the new server !"));
         });
     })
 
@@ -82,7 +85,7 @@ bot.on("guildCreate", async guild => {
 bot.on("message", async message => {
     if (message.author.bot) return;
     console.log(Util.SQL_getBanInfo(message.author.id))
-    //if (Util.SQL_getBanInfo(message.author.id).includes(message.author.id)) return console.log(`'${message.author.tag}' is a banned user`);
+    //if (Util.SQL_getBanInfo(message.author.id).includes(message.author.id)) return console.log(colors.green(`'${message.author.tag}' is a banned user`);
 
     //#region Bot Permissions
     bot.BOT_SEND_MESSAGESPerm = await message.guild.channels.find(c => c.id === message.channel.id).permissionsFor(message.guild.me).has("SEND_MESSAGES") && message.channel.type === 'text'
@@ -162,7 +165,11 @@ bot.on("message", async message => {
 
 //#region All functions
 async function StreamInterval() {
-    Util.Verify_Stream_Table()
+    //Working
+    //Util.Verify_Stream_Table()
+
+    //Util.Verify_New_Streamers()
+
     /*
     Util.SQL_Instance_AddAnnouced()
     Util.SQL_Instance_AddDeleted()
@@ -175,12 +182,12 @@ async function StreamInterval() {
         for (var i_m in guild.members.array()) {
             m = guild.members.array()[i_m]
 
-            //console.log(m.presence)
+            //console.log(colors.green(m.presence)
             if (!m.presence) return;
             if (!m.presence.status) return;
 
             if (m.presence.status == "streaming") {
-                console.log(`${m.member.user.tag} is streaming`)
+                console.log(colors.yellow(`${m.member.user.tag} is streaming`))
                 //do something with that
             }
         }
@@ -235,7 +242,7 @@ function ChangeState2() {
         time_string = `${time.get("seconds")} ${time_var.s}.`
     }
 
-    //console.log(time_string)
+    //console.log(colors.green(time_string)
     bot.user.setActivity(`${config.prefix}help | Launched since ${time_string}`, { type: "STREAMING", url: "https://twitch.tv/RisedSky_FR" })
 
     setTimeout(async () => { ChangeState1() }, 60000);
@@ -261,7 +268,7 @@ function checkCommand(command, name) {
 fs.readdir("./commands/", (err, files) => {
     if (err) console.log(err);
     jsfiles = files.filter(f => f.endsWith(".js"));
-    if (jsfiles.length <= 0) return console.log("Couldn't find commands.");
+    if (jsfiles.length <= 0) return console.log(colors.red("Couldn't find commands."));
     jsfiles.forEach((f) => {
         try {
             var props = require(`./commands/${f}`);
@@ -272,8 +279,8 @@ fs.readdir("./commands/", (err, files) => {
             }
         } catch (err) {
             bot.disabledCommands.push(f);
-            console.log(`\nThe ${f} command failed to load:`);
-            console.log(err);
+            console.log(colors.red(`\nThe ${f} command failed to load:`))
+            console.log(colors.red(err))
         }
     });
 });
