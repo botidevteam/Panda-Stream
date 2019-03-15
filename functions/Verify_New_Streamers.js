@@ -154,10 +154,10 @@ module.exports = {
 
                     //console.log(dataUser)
                     if (dataUser.stream == null || dataUser.stream == undefined) {
-                        console.log(colors.green(`dataUser=NULL`))
+                        //console.log(colors.green(`dataUser=NULL`))
                         return Delete_User_data_and_Streaming_Status(Streaming_User)
                     } else {
-                        console.log(colors.green(`dataUser!=NULL`))
+                        //console.log(colors.green(`dataUser!=NULL`))
                         console.log(colors.green("il devrait stream normalement !"))
                         console.log(colors.green(dataUser.stream.channel.name))
 
