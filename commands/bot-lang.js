@@ -10,7 +10,7 @@ module.exports = {
             , message = call.message
 
         if (!call.bot.member_Has_MANAGE_GUILD) {
-            return message.reply(Util.notAllowedCommand("prefix", "MANAGE_GUILD"))
+            return message.channel.send(Util.notAllowedCommand("prefix", "MANAGE_GUILD", message))
         }
         
         Util.SQL_GetResult(Util.db_Model.servers, "ServerID", message, message.member).then(results => {

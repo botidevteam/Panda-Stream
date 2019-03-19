@@ -20,7 +20,7 @@ module.exports = {
 
             const Streaming_User = []
             results_users.forEach(i_u => {
-                if (i_u.IS_STREAMING) Streaming_User.push(i_u)
+                if (i_u.IS_STREAMING) { Streaming_User.push(i_u) }
             });
 
             if (Streaming_User == "" || Streaming_User == null || Streaming_User == undefined) return //console.log(`Nothing in the Streaming_User`)
@@ -61,15 +61,16 @@ module.exports = {
 
                     Streaming_User.forEach(r_u => {
                         //console.log(colors.green(r_u.UserID)
-                        SelectAll(r_u.UserID).then(result => {
-                            if (!result) {
-                                //console.log(colors.green("pas result")
-                                addUser(r_u)
-                            } else {
-                                //console.log(colors.green(`result=${result}`)
-                                Verify_Twitch_Status(result)
-                            }
-                        })
+                        SelectAll_Queue(r_u.UserTwitch, r_u.ServerID, r_u.ChannelID)
+                            .then(result => {
+                                if (!result) {
+                                    //console.log(colors.green("pas result")
+                                    addUser(r_u)
+                                } else {
+                                    //console.log(colors.green(`result=${result}`)
+                                    Verify_Twitch_Status(result)
+                                }
+                            })
                     })
                 }
             });
@@ -88,13 +89,15 @@ module.exports = {
                 ])
         }
 
-        function SelectAll(UserID) {
+        function SelectAll_Queue(UserTwitch, ServerID, ChannelID) {
             /**
-             * @param UserID The UserID
+             * @param UserTwitch The UserTwitch
+             * @param ServerID The ServerID
+             * @param ChannelID The ChannelID
              * @param returns 
              */
             return new Promise(async (resolve, reject) => {
-                bot.con.query(`SELECT * FROM ${Util.db_Model.queue} WHERE UserID = ${UserID}`, (err, results) => {
+                bot.con.query(`SELECT * FROM ${Util.db_Model.queue} WHERE UserTwitch = '${UserTwitch}' AND ServerID = '${ServerID}' AND ChannelID = '${ChannelID}'`, (err, results) => {
                     /**
                     * @param results.UserID
                     * @param results.UserTwitch
@@ -121,7 +124,7 @@ module.exports = {
              */
 
             bot.twitch.getUser(Streaming_User.UserTwitch)
-            //bot.twitch.getUser("squeezielive")
+                //bot.twitch.getUser("squeezielive")
                 .then(async data => {
                     const dataUser = await data;
 
@@ -146,13 +149,22 @@ module.exports = {
                     viewers:8653
                     * */
 
-                    console.log(dataUser)
+                    //console.log(dataUser)
                     if (dataUser.stream == null || dataUser.stream == undefined) {
                         //console.log(colors.green(`dataUser=NULL`))
+
+                        /*
+                        bot.con.query(`SELECT * FROM ${Util.db_Model.queue} WHERE UserTwitch = '${Streaming_User.UserTwitch}' AND ServerID = '${Streaming_User.ServerID}' AND ChannelID = '${Streaming_User.ChannelID}'`, (results, error) => {
+                            console.log(results)
+                            //console.log()
+                        })
+                        */
+
                         return Delete_User_data_and_Streaming_Status(Streaming_User)
                     } else {
                         //console.log(colors.green(`dataUser!=NULL`))
-                        console.log(colors.green("il devrait stream normalement !"))
+                        //console.log(colors.green(`il devrait stream normalement (${Streaming_User.UserTwitch})`))
+
 
 
                         var guild_user = bot.bot.guilds.find(g => g.id == Streaming_User.ServerID)
@@ -162,8 +174,7 @@ module.exports = {
                             Delete_User_data_and_Streaming_Status(Streaming_User)
                             const User = bot.bot.users.find(u => u.id == Streaming_User.UserID)
                             if (User) {
-                                User.createDM()
-                                    .then(Util.SQL_DM_Invalid(Streaming_User.UserID, Streaming_User, "ServerID"))
+                                User.createDM().then(Util.SQL_DM_Invalid(Streaming_User.UserID, Streaming_User, "ServerID"))
                             }
                             return;
                         }
@@ -175,8 +186,7 @@ module.exports = {
                             Delete_User_data_and_Streaming_Status(Streaming_User)
                             const User = bot.bot.users.find(u => u.id == Streaming_User.UserID)
                             if (User) {
-                                User.createDM()
-                                    .then(Util.SQL_DM_Invalid(Streaming_User.UserID, Streaming_User, "ChannelID"))
+                                User.createDM().then(Util.SQL_DM_Invalid(Streaming_User.UserID, Streaming_User, "ChannelID"))
                             }
                             return;
                         }
@@ -193,10 +203,10 @@ module.exports = {
 
                         } else if (Streaming_User.MessageID != null) {
                             //Si le message de notif EST envoyé
-                            console.log(colors.green(`MessageID=${Streaming_User.MessageID}`))
+                            //console.log(colors.green(`MessageID=${Streaming_User.MessageID}`))
                             var message_user = channel_user.fetchMessage(Streaming_User.MessageID)
                                 .then(async msg => {
-                                    console.log(colors.green("Finded the msg"))
+                                    //console.log(colors.green("Finded the msg"))
                                     //msg.edit("TEST DE OUF")
                                 })
                                 .catch(console.error);
@@ -219,7 +229,7 @@ module.exports = {
 
         function Delete_User_data_and_Streaming_Status(Streaming_User) {
             console.log(colors.green(`Deleting the data of the user ${Streaming_User.UserID} - ${Streaming_User.UserTwitch}`))
-            bot.con.query(`UPDATE ${Util.db_Model.users} SET IS_STREAMING = '0' WHERE UserID = ${Streaming_User.UserID}`, (error) => {
+            bot.con.query(`UPDATE ${Util.db_Model.users} SET IS_STREAMING = '0' WHERE UserTwitch = '${Streaming_User.UserTwitch}' AND ServerID = '${Streaming_User.ServerID}' AND ChannelID = '${Streaming_User.ChannelID}'`, (error) => {
                 if (error) console.error(error)
             })
 
@@ -235,9 +245,9 @@ module.exports = {
                     channel_user.fetchMessage(Streaming_User.MessageID)
                         .then(async msg => {
                             console.log(colors.green("Finded the msg"))
-                            msg.delete()
+                            await msg.delete()
                         })
-                        .catch(console.error);
+                        .catch(console.log("Didn't find the message"));
                 }
             }
         }

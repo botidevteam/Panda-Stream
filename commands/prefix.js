@@ -11,7 +11,7 @@ module.exports = {
             , config = require("../config")
 
         if (!call.bot.member_Has_MANAGE_GUILD) {
-            return message.reply(Util.notAllowedCommand("prefix", "MANAGE_GUILD"))
+            return message.channel.send(Util.notAllowedCommand("prefix", "MANAGE_GUILD", message))
         }
 
         Util.SQL_GetResult(Util.db_Model.servers, "ServerID", message, message.member).then(results => {
@@ -23,17 +23,27 @@ module.exports = {
              * @param results.ServerOwnerID The server owner ID
              * @param results.ServerPrefix The server prefix
              */
-            var embed_help = new Discord.RichEmbed()
+            let embed_help = new Discord.RichEmbed()
                 .setColor("ORANGE")
                 .setFooter(`Command Requested by ${message.member.user.tag}`)
 
-            var embed = new Discord.RichEmbed()
+            let embed = new Discord.RichEmbed()
                 .setColor("GREEN")
                 .setAuthor(`The prefix of the server`, message.member.user.avatarURL)
                 .setDescription(`The current prefix of this server is
                     \`\`\`${results.ServerPrefix}\`\`\`
                     `
                 )
+                .setFooter(`Command Requested by ${message.member.user.tag}`)
+
+            let embed_message_good = new Discord.RichEmbed()
+                .setColor("GREEN")
+                .setAuthor(`The prefix of the server`, message.member.user.avatarURL)
+                .setFooter(`Command Requested by ${message.member.user.tag}`)
+
+            let embed_message_warn = new Discord.RichEmbed()
+                .setColor("GREEN")
+                .setAuthor(`The prefix of the server`, message.member.user.avatarURL)
                 .setFooter(`Command Requested by ${message.member.user.tag}`)
 
             if (!call.args[0]) {
@@ -52,19 +62,29 @@ module.exports = {
                 } else if (call.args[0] === "set") {
                     if (!call.args[1]) {
                         message.react(Util.EmojiRedTickString).then(() => message.delete(5000))
-                        message.channel.send(`You forgot to put the new prefix of the server!`).then(() => Util.deleteMyMessage(message, 6000))
+                        embed_message_warn
+                            .setDescription(`You forgot to put the new prefix of the server!`)
+                        message.channel.send(embed_message_warn).then(msg => Util.deleteMyMessage(msg, 10000))
                     } else {
                         if (call.args[1].length <= 1) {
                             message.react(Util.EmojiRedTickString).then(() => message.delete(5000))
-                            message.channel.send(`You can't put a prefix smaller than 2 caracters !`).then(() => Util.deleteMyMessage(message, 6000))
+                            embed_message_warn
+                                .setDescription(`You can't put a prefix smaller than 1 caracters !`)
+                            message.channel.send(embed_message_warn).then(msg => Util.deleteMyMessage(msg, 10000))
+
                         } else if (call.args[1].length >= 10) {
                             message.react(Util.EmojiRedTickString).then(() => message.delete(5000))
-                            message.channel.send(`You can't put a prefix bigger than 10 caracters !`).then(() => Util.deleteMyMessage(message, 6000))
+                            embed_message_warn
+                                .setDescription(`You can't put a prefix bigger than 10 caracters !`)
+                            message.channel.send(embed_message_warn).then(msg => Util.deleteMyMessage(msg, 10000))
+
                         } else {
                             call.bot.con.query(`UPDATE ${Util.db_Model.servers} SET ServerPrefix = '${call.args[1]}' WHERE ServerID = '${message.guild.id}'`, (error, res) => {
                                 if (error) message.channel.send(Util.errorMessage(error, "prefix"))
 
-                                message.channel.send(`Successfully updated the prefix to \`${call.args[1]}\``)
+                                embed_message_good
+                                    .setDescription(`Successfully updated the prefix to \`${call.args[1]}\``)
+                                message.channel.send(embed_message_good)
                             })
                         }
                     }
@@ -76,8 +96,9 @@ module.exports = {
                     message.react(Util.EmojiGreenTickString).then(() => message.delete(5000))
                     call.bot.con.query(`UPDATE ${Util.db_Model.servers} SET ServerPrefix = '${config.prefix}' WHERE ServerID = '${message.guild.id}'`, (error, res) => {
                         if (error) message.channel.send(Util.errorMessage(error, "prefix"))
-
-                        message.channel.send(`Successfully reset the prefix of this server to \`${call.args[1]}\``)
+                        else {
+                            message.channel.send(`Successfully reset the prefix of this server to \`${call.args[1]}\``)
+                        }
                     })
                 }
             }

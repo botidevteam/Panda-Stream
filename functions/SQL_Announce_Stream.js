@@ -9,8 +9,11 @@ module.exports = {
             , Util = require("../Util")
             , Discord = require("discord.js")
 
+        let dataStream_Game
         if (!Compact_Mode) Compact_Mode = false
-
+        if (!dataStream.stream.game) {
+            dataStream_Game = "Nothing (No data found in his profile)"
+        } else { dataStream_Game = dataStream.stream.game }
 
         let embed_to_send = new Discord.RichEmbed()
             .setColor("PURPLE")
@@ -26,7 +29,7 @@ module.exports = {
                     .setTitle(dataStream.stream.channel.name)
                     .setURL(dataStream.stream.channel.url)
                     .setThumbnail(dataStream.stream.channel.logo)
-                    .addField(`Now Playing`, dataStream.stream.game)
+                    .addField(`Now Playing`, dataStream_Game)
                     .addField(`Stream Title`, dataStream.stream.channel.status)
                 break;
 
@@ -35,7 +38,7 @@ module.exports = {
                     .setAuthor(`${dataStream.stream.channel.name} is now streaming!`, `https://i.ibb.co/NF3XdbK/twitch-logo.jpg`)
                     .setURL(dataStream.stream.channel.url)
                     .setThumbnail(dataStream.stream.channel.logo)
-                    .addField(`Now Playing`, dataStream.stream.game)
+                    .addField(`Now Playing`, dataStream_Game)
                     .addField(`Stream Title`, dataStream.stream.channel.status)
                     .addField(`Followers`, dataStream.stream.channel.followers, true)
                     .addField(`Total Views`, dataStream.stream.channel.views, true)
@@ -50,8 +53,12 @@ module.exports = {
                 .then(msg => {
                     console.log(`The data of the msg sended is : ${msg.id}`)
 
-                    bot.con.query(`UPDATE ${Util.db_Model.queue} SET MessageID = '${msg.id}' WHERE UserID = ${Streaming_User.UserID}`, (error) => {
+                    bot.con.query(`UPDATE ${Util.db_Model.queue} SET MessageID = '${msg.id}' WHERE UserTwitch = '${Streaming_User.UserTwitch}' AND ServerID = '${Streaming_User.ServerID}' AND ChannelID = '${Streaming_User.ChannelID}'`, (error) => {
                         if (error) console.error(error)
+                        else {
+                            console.log(`Added`)
+                            console.log(`UPDATE ${Util.db_Model.queue} SET MessageID = '${msg.id}' WHERE UserTwitch = '${Streaming_User.UserTwitch}' AND ServerID = '${Streaming_User.ServerID}' AND ChannelID = '${Streaming_User.ChannelID}'`)
+                        }
                     })
                 })
         }

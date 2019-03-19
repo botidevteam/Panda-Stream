@@ -12,8 +12,8 @@ module.exports = {
             , bot = require("../bot").bot
 
 
-        if (!call.bot.member_Has_MANAGE_GUILD) {
-            return message.reply(Util.notAllowedCommand("prefix", "MANAGE_GUILD"))
+        if (!call.bot.member_Has_MANAGE_MESSAGES) {
+            return message.channel.send(Util.notAllowedCommand("prefix", "MANAGE_MESSAGES", message))
         }
 
         if (!call.args[0]) {

@@ -12,7 +12,7 @@ module.exports = {
             bot.con.query(`SELECT * FROM ${Util.db_Model.users} WHERE UserID = '${userID}'`, (err, results) => {
                 if (!err) {
                     if (results == null) {
-                        Util.SQL_addNewUser_In_DB_Users(member);
+                        //Util.SQL_addNewUser_In_DB_Users(member);
                         resolve();
                     } else resolve(results[0]);
                 } else reject(err);

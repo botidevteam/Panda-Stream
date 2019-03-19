@@ -29,19 +29,11 @@ module.exports = {
 
             //console.log(Check_Streaming_User)
 
-            Check_Streaming_User.forEach(i_u => {
-                if (i_u == "" || i_u == null || i_u == undefined) return
-                if (i_u.ServerID == null || i_u.ChannelID == null) return
-
-                //addUser(i_u)
-                //addUser(i_u)
-            });
-            //console.log("NON NULL")
-
-
             Check_Streaming_User.forEach(r_u => {
+                if (r_u == "" || r_u == null || r_u == undefined) return;
+                if (r_u.ServerID == null || r_u.ChannelID == null) return;
                 //console.log(colors.green(r_u.UserID)
-                SelectAll_Users(r_u.UserID)
+                SelectAll_Users(r_u.UserTwitch, r_u.ServerID, r_u.ChannelID)
                     .then(result => {
                         if (result) {
                             //console.log(colors.green(`result`))
@@ -50,9 +42,6 @@ module.exports = {
                         }
                     })
             })
-
-
-
         });
 
         function addUser(Streaming_User) {
@@ -63,17 +52,19 @@ module.exports = {
                 Streaming_User.ChannelID,
                 Streaming_User.Stream_Text,
                 Streaming_User.Remove_MSG_On_End,
-                '1'
+                    '1'
                 ])
         }
 
-        function SelectAll_Users(UserID) {
+        function SelectAll_Users(UserTwitch, ServerID, ChannelID) {
             /**
-             * @param UserID The UserID
+             * @param UserTwitch The UserTwitch
+             * @param ServerID The ServerID
+             * @param ChannelID The ChannelID
              * @param returns 
              */
             return new Promise(async (resolve, reject) => {
-                bot.con.query(`SELECT * FROM ${Util.db_Model.users} WHERE UserID = ${UserID}`, (err, results) => {
+                bot.con.query(`SELECT * FROM ${Util.db_Model.users} WHERE UserTwitch = '${UserTwitch}' AND ServerID = '${ServerID}' AND ChannelID = '${ChannelID}'`, (err, results) => {
                     /**
                     * @param results.UserID
                     * @param results.UserTwitch
@@ -94,13 +85,15 @@ module.exports = {
             });
         }
 
-        function SelectAll_Queue(UserID) {
+        function SelectAll_Queue(UserTwitch, ServerID, ChannelID) {
             /**
-             * @param UserID The UserID
+             * @param UserTwitch The UserTwitch
+             * @param ServerID The ServerID
+             * @param ChannelID The ChannelID
              * @param returns 
              */
             return new Promise(async (resolve, reject) => {
-                bot.con.query(`SELECT * FROM ${Util.db_Model.queue} WHERE UserID = ${UserID}`, (err, results) => {
+                bot.con.query(`SELECT * FROM ${Util.db_Model.queue} WHERE UserTwitch = '${UserTwitch}' AND ServerID = '${ServerID}' AND ChannelID = '${ChannelID}'`, (err, results) => {
                     /**
                     * @param results.UserID
                     * @param results.UserTwitch
@@ -158,8 +151,8 @@ module.exports = {
                         return Delete_User_data_and_Streaming_Status(Streaming_User)
                     } else {
                         //console.log(colors.green(`dataUser!=NULL`))
-                        console.log(colors.green("il devrait stream normalement !"))
-                        console.log(colors.green(dataUser.stream.channel.name))
+                        //console.log(colors.green("il devrait stream normalement !"))
+                        //console.log(colors.green(dataUser.stream.channel.name))
 
                         var guild_user = bot.bot.guilds.find(g => g.id == Streaming_User.ServerID)
                         if (!guild_user) {
@@ -188,7 +181,7 @@ module.exports = {
                         }
 
 
-                        SelectAll_Queue(Streaming_User.UserID)
+                        SelectAll_Queue(Streaming_User.UserTwitch, Streaming_User.ServerID, Streaming_User.ChannelID)
                             .then(result => {
                                 if (!result) {
                                     //console.log(colors.green(`result`))
@@ -239,7 +232,7 @@ module.exports = {
         function Add_User_data_and_Streaming_Status(Streaming_User) {
             console.log(colors.green(`Adding the data of the user ${Streaming_User.UserID} - ${Streaming_User.UserTwitch}`))
 
-            bot.con.query(`UPDATE ${Util.db_Model.users} SET IS_STREAMING = '1' WHERE UserID = ${Streaming_User.UserID}`, (error) => {
+            bot.con.query(`UPDATE ${Util.db_Model.users} SET IS_STREAMING = '1' WHERE UserTwitch = '${Streaming_User.UserTwitch}' AND ServerID = '${Streaming_User.ServerID}' AND ChannelID = '${Streaming_User.ChannelID}'`, (error) => {
                 if (error) console.error(error)
             })
 

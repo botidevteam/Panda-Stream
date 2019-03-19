@@ -5,10 +5,8 @@ module.exports = {
     run: async (call) => {
         const discord = require('discord.js')
             , Util = require("../Util")
-            , SQL = require('../functions/SQL_GetResult.js')
             , config = require('../config.js')
             , bot = require("../bot.js").bot
-            , Call = require('../bot.js').Call
 
         var message = call.message
             , user = call.message.member
@@ -20,10 +18,9 @@ module.exports = {
             .setDescription("Предупреждение")
             .setColor('#e22216')
             .addField("Administator: ", message.author.username)
-            .addField("Warned user: ", `${rUser.user.username}`)
-            .addField("Number of warnings: ", `${profile.warns}/3`);
+            .addField("Warned user: ", `${rUser.user.username}`);
         message.channel.send(embed);
-        //rUser.send()
+        rUser.send(embed);
 
     }
 }

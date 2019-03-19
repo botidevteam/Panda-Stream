@@ -48,10 +48,12 @@ module.exports = {
     SQL_getBanInfo: require("./functions/SQL_getBanInfo").function,
     SQL_GetUserStats: require("./functions/SQL_GetUserStats").function,
 
+    SQL_addNewUser_In_DB_Users: require("./functions/SQL_addNewUser_In_DB_Users").function,
     SQL_AddServer: require("./functions/SQL_AddServer").function,
 
     SQL_DM_Invalid: require("./functions/SQL_DM_Invalid").function,
     SQL_Announce_Stream: require("./functions/SQL_Announce_Stream").function,
+    SQL_Update_Stream: require("./functions/SQL_Update_Stream").function,
     SQL_addBannedUsers: require("./functions/SQL_addBannedUsers").function,
     SQL_removeBannedUsers: require("./functions/SQL_removeBannedUsers").function,
     //Not finished yet - SQL_addNewUser_In_DB_Users: require("./functions/SQL_addNewUser_In_DB_Users").function,

@@ -50,18 +50,23 @@ bot.once("ready", () => {
     bot.user.setActivity(`${config.prefix}help | Started and ready!`, { type: "STREAMING", url: "https://twitch.tv/RisedSky_FR" })
 
     for (var i in bot.guilds.array()) {
-        console.log(`Server number ${i} » '${bot.guilds.array()[i]}'`)
+        console.log(colors.cyan(`Server number ${i} » '${bot.guilds.array()[i]}'`))
     }
 
     Util.SQL_Instance_Erase() //Delete all the data from the instance table
 
     setInterval(async () => {
         Util.Verify_New_Streamers()
+    }, 1000);
+
+    setInterval(async () => {
+        Util.Verify_Stream_Table()
     }, 5000);
 
     setInterval(async () => {
-        Util.Verify_Stream_Table()        
-    }, 10000);
+        Util.SQL_Update_Stream()
+    }, 300000);
+    
 
     console.log(colors.blue("The bot is now ready !"))
     setTimeout(ChangeState1, 60000);
@@ -74,19 +79,18 @@ bot.once("ready", () => {
 
 bot.on("guildCreate", async guild => {
     bot.con.query(`SELECT * FROM ${Util.db_Model.servers} WHERE ServerID = '${guild.id}`, (error, res) => {
-        if (error) bot.con.query(`INSERT INTO ${Util.db_Model.servers} (ServerName, ServerID, ServerPrefix, ServerLang) VALUES (?, ?, ?, ?)`, [guild.name, guild.id, config.prefix, "english"], (err, results) => {
-            if (err) console.log(err);
-            console.log(colors.green("Inserted the new server !"));
-        });
+        if (error || res == null) {
+            bot.con.query(`INSERT INTO ${Util.db_Model.servers} (ServerName, ServerID, ServerOwnerID, ServerPrefix, ServerLang) VALUES (?, ?, ?, ?, ?)`, [guild.name, guild.id, guild.ownerID, config.prefix, "english"], (err, results) => {
+                if (err) console.log(err);
+                console.log(colors.green("Inserted the new server !"));
+            });
+        }
     })
 
 })
 
 bot.on("message", async message => {
     if (message.author.bot) return;
-    console.log(Util.SQL_getBanInfo(message.author.id))
-    //if (Util.SQL_getBanInfo(message.author.id).includes(message.author.id)) return console.log(colors.green(`'${message.author.tag}' is a banned user`);
-
     //#region Bot Permissions
     bot.BOT_SEND_MESSAGESPerm = await message.guild.channels.find(c => c.id === message.channel.id).permissionsFor(message.guild.me).has("SEND_MESSAGES") && message.channel.type === 'text'
     bot.BOT_MANAGE_MESSAGESPerm = await message.guild.channels.find(c => c.id === message.channel.id).permissionsFor(message.guild.me).has("MANAGE_MESSAGES") && message.channel.type === 'text'
@@ -100,8 +104,8 @@ bot.on("message", async message => {
     bot.member_Has_BAN_MEMBERS = await message.guild.channels.find(c => c.id === message.channel.id).permissionsFor(message.member).has("BAN_MEMBERS") && message.channel.type === 'text'
     bot.member_Has_KICK_MEMBERS = await message.guild.channels.find(c => c.id === message.channel.id).permissionsFor(message.member).has("KICK_MEMBERS") && message.channel.type === 'text'
     bot.member_Has_MANAGE_GUILD = await message.guild.channels.find(c => c.id === message.channel.id).permissionsFor(message.member).has("MANAGE_GUILD") && message.channel.type === 'text'
-    bot.member_has_MANAGE_MESSAGES = await message.guild.channels.find(c => c.id === message.channel.id).permissionsFor(message.member).has("MANAGE_MESSAGES") && message.channel.type === 'text'
-    bot.member_has_MANAGE_CHANNELS = await message.guild.channels.find(c => c.id === message.channel.id).permissionsFor(message.member).has("MANAGE_CHANNELS") && message.channel.type === 'text'
+    bot.member_Has_MANAGE_MESSAGES = await message.guild.channels.find(c => c.id === message.channel.id).permissionsFor(message.member).has("MANAGE_MESSAGES") && message.channel.type === 'text'
+    bot.member_Has_MANAGE_CHANNELS = await message.guild.channels.find(c => c.id === message.channel.id).permissionsFor(message.member).has("MANAGE_CHANNELS") && message.channel.type === 'text'
     //#endregion
 
     Util.SQL_GetResult(Util.db_Model.servers, "ServerID", message, message.member).then(async results => {
@@ -114,21 +118,26 @@ bot.on("message", async message => {
          * @param results.ServerPrefix The server prefix
          */
 
-        //const prefix = await config.prefix
-        const prefix = await results.ServerPrefix
+        const server_prefix = await results.ServerPrefix
             //, cmd = await message.content.slice(config.prefix.length).trim().split(/ +/g).shift()
             //, args = await message.content.slice(config.prefix.length).trim().split(/ +/g).join(" ").slice(cmd.length + 1).split(" ")
-            , cmd = await message.content.slice(results.ServerPrefix.length).trim().split(/ +/g).shift()
-            , args = await message.content.slice(results.ServerPrefix.length).trim().split(/ +/g).join(" ").slice(cmd.length + 1).split(" ")
+            , server_cmd = await message.content.slice(results.ServerPrefix.length).trim().split(/ +/g).shift()
+            , server_args = await message.content.slice(results.ServerPrefix.length).trim().split(/ +/g).join(" ").slice(server_cmd.length + 1).split(" ")
             //, cmd = message.content.slice(config.prefix.length).trim().split(/ +/g)
-            , content = await args.join(" ");
+            , server_content = await server_args.join(" ");
+
+        const default_prefix = await config.prefix
+            , default_cmd = message.content.slice(default_prefix.length).trim().split(/ +/g).shift()
+            , default_args = await message.content.slice(default_prefix.length).trim().split(/ +/g).join(" ").slice(default_cmd.length + 1).split(" ")
+            , default_content = await default_args.join(" ");
+
 
         if (message.channel.topic && String(message.channel.topic).includes(":ideas:")) {
             message.react(Util.EmojiGreenTickString)
             message.react(Util.EmojiRedTickString)
         }
 
-        if (message.content.startsWith(prefix) && !message.author.bot) {
+        if (message.content.startsWith(server_prefix) && !message.author.bot) {
             if (message.channel.topic)
                 if (String(message.channel.topic).toLowerCase().includes(":nocmds:")) {
                     if (!bot.member_Has_ADMINISTRATOR) {
@@ -137,15 +146,22 @@ bot.on("message", async message => {
                     }
                 }
 
-            const commandFile = bot.commands.find((command) => (command.help.aliases || []).concat([command.help.name]).includes(cmd));
+            Util.SQL_getBanInfo(message.author.id).then(results => {
+                if (!results) { console.log("Not banned") }
+                else { return console.log(results) }
+            })
+            //if (Util.SQL_getBanInfo(message.author.id).includes(message.author.id)) return console.log(colors.green(`'${message.author.tag}' is a banned user`);
+
+            const commandFile = bot.commands.find((command) => (command.help.aliases || []).concat([command.help.name]).includes(server_cmd));
             if (commandFile != null) {
                 if (message.channel.type !== "dm" || (commandFile.help.dm || false)) {
-                    commandFile.run(new Call(message, bot, bot.commands, args, content, prefix, cmd));
+                    commandFile.run(new Call(message, bot, bot.commands, server_args, server_content, server_prefix, server_cmd));
                 } else message.reply("This command is not working in DM.").catch(() => { });
             }
 
             //IF THE COMMAND IS FROM THE DEFAULT PREFIX THEN
-        } else if (message.content.startsWith(config.prefix) && !message.author.bot) {
+        } else if (message.content.startsWith(default_prefix) && !message.author.bot) {
+            console.log(colors.green(`Detected the prefix ${default_prefix}`))
             if (message.channel.topic)
                 if (String(message.channel.topic).toLowerCase().includes(":nocmds:")) {
                     if (!bot.member_Has_ADMINISTRATOR) {
@@ -153,10 +169,18 @@ bot.on("message", async message => {
                         return message.delete(1250);
                     }
                 }
-            const commandFile = bot.commands.find((command) => (command.help.aliases || []).concat([command.help.name]).includes(cmd));
+
+
+            Util.SQL_getBanInfo(message.author.id).then(results => {
+                if (!results) { console.log("Not banned") }
+                else { return console.log(results) }
+            })
+            //if (Util.SQL_getBanInfo(message.author.id).includes(message.author.id)) return console.log(colors.green(`'${message.author.tag}' is a banned user`);
+
+            const commandFile = bot.commands.find((command) => (command.help.aliases || []).concat([command.help.name]).includes(default_cmd));
             if (commandFile != null) {
                 if (message.channel.type !== "dm" || (commandFile.help.dm || false)) {
-                    commandFile.run(new Call(message, bot, bot.commands, args, content, config.prefix, cmd));
+                    commandFile.run(new Call(message, bot, bot.commands, default_args, default_content, default_prefix, default_cmd));
                 } else message.reply("This command is not working in DM.").catch(() => { });
             }
         }

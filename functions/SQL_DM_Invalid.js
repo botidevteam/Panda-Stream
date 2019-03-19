@@ -40,11 +40,11 @@ module.exports = {
                 c.send(embed)
             })
 
-        bot.con.query(`UPDATE ${Util.db_Model.users} SET IS_STREAMING = '${false}' WHERE UserID = ${Streaming_User.UserID}`, (error) => {
+        bot.con.query(`UPDATE ${Util.db_Model.users} SET IS_STREAMING = '${false}' WHERE UserTwitch = '${Streaming_User.UserTwitch}' AND ServerID = '${Streaming_User.ServerID}' AND ChannelID = '${Streaming_User.ChannelID}'`, (error) => {
             if (error) console.error(error)
         })
 
-        bot.con.query(`UPDATE ${Util.db_Model.users} SET ${Invalid_Value} = '${null}' WHERE UserID = ${Streaming_User.UserID}`, (error) => {
+        bot.con.query(`UPDATE ${Util.db_Model.users} SET ${Invalid_Value} = NULL WHERE UserTwitch = '${Streaming_User.UserTwitch}' AND ServerID = '${Streaming_User.ServerID}' AND ChannelID = '${Streaming_User.ChannelID}'`, (error) => {
             if (error) console.error(error)
         })
     }

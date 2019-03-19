@@ -23,11 +23,11 @@ module.exports = {
         if (time.get("hours") > 1) { time_var.h = "hours" }
         else if (time.get("hours") == 1) { time_var.h = "hour" }
 
-        if (time.get("minutes") > 1) { time_var.m = "minutes" }
-        else if (time.get("minutes") == 1) { time_var.m = "minute" }
+        if (time.get("minutes") > 1) { time_var.m = "mins" }
+        else if (time.get("minutes") == 1) { time_var.m = "min" }
 
-        if (time.get("seconds") > 1) { time_var.s = "seconds" }
-        else if (time.get("seconds") == 1) { time_var.s = "second" }
+        if (time.get("seconds") > 1) { time_var.s = "secs" }
+        else if (time.get("seconds") == 1) { time_var.s = "sec" }
 
 
         if (time.get("days") >= 1) {

@@ -21,6 +21,5 @@ module.exports = {
         //-----------------------------------
         Util.log_test("azeazzeazea")
         Util.NotifyUser("516033691525447680")
-
     }
 }

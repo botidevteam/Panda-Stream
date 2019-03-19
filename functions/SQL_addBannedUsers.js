@@ -9,9 +9,10 @@ module.exports = {
     //Util.SQL_addBannedUsers(userToBan, userBanReason, message.member.ID)
     function(userID, userTag, userBanReason, userBannerID) {
         const bot = require("../bot").bot
-        , Util = require("../Util")
+            , Util = require("../Util")
+
         bot.con.query(`INSERT INTO ${Util.db_Model.bannedusers} (userID, userTag, userBanReason, userBannerID) VALUES (?, ?, ?, ?)`, [userID, userTag, userBanReason, userBannerID], (err, results) => {
-            if (err) console.log(err);
+            if (err) { console.error(err) }
 
             console.log(`Successfully added ${userToBan} in the banList`);
         });
