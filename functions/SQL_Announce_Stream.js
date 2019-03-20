@@ -35,13 +35,14 @@ module.exports = {
 
             case false:
                 embed_to_send
-                    .setAuthor(`${dataStream.stream.channel.name} is now streaming!`, `https://i.ibb.co/NF3XdbK/twitch-logo.jpg`)
+                    .setTitle(`${dataStream.stream.channel.name} is now streaming!`) //, `https://i.ibb.co/NF3XdbK/twitch-logo.jpg`)
                     .setURL(dataStream.stream.channel.url)
                     .setThumbnail(dataStream.stream.channel.logo)
                     .addField(`Now Playing`, dataStream_Game)
                     .addField(`Stream Title`, dataStream.stream.channel.status)
                     .addField(`Followers`, dataStream.stream.channel.followers, true)
                     .addField(`Total Views`, dataStream.stream.channel.views, true)
+                    .setImage(dataStream.stream.preview.large)
                 break;
         }
 

@@ -37,7 +37,7 @@ module.exports = {
             if (error) console.error(error)
             if (!results) console.error("No results")
 
-            console.log(results)
+            //console.log(results)
 
             results.forEach(async Streaming_User => {
                 //console.log(Streaming_User)
@@ -69,13 +69,14 @@ module.exports = {
                             case 0:
                                 embed_to_send = new Discord.RichEmbed()
                                     .setColor("PURPLE")
-                                    .setAuthor(`${dataStream.stream.channel.name} is now streaming!`, `https://i.ibb.co/NF3XdbK/twitch-logo.jpg`)
+                                    .setTitle(`${dataStream.stream.channel.name} is now streaming!`)// , `https://i.ibb.co/NF3XdbK/twitch-logo.jpg`)
                                     .setURL(dataStream.stream.channel.url)
                                     .setThumbnail(dataStream.stream.channel.logo)
                                     .addField(`Now Playing`, dataStream_Game)
                                     .addField(`Stream Title`, dataStream.stream.channel.status)
                                     .addField(`Followers`, dataStream.stream.channel.followers, true)
                                     .addField(`Total Views`, dataStream.stream.channel.views, true)
+                                    .setImage(dataStream.stream.preview.large)
                                     .setFooter(`${bot.bot.user.username} is a streaming bot | Best Streaming Latence`, bot.bot.user.avatarURL)
                                     .setTimestamp()
                                 break;

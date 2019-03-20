@@ -68,6 +68,7 @@ bot.once("ready", () => {
     }, 300000);
     
 
+    //Util.startupsite()
     console.log(colors.blue("The bot is now ready !"))
     setTimeout(ChangeState1, 60000);
     //Util.startupsite()

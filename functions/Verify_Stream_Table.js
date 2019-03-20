@@ -2,6 +2,7 @@ module.exports = {
     function() {
         const bot = require("../bot")
             , Util = require("../Util")
+            , Discord = require("discord.js")
             , colors = require("colors")
 
         bot.con.query(`SELECT * FROM ${Util.db_Model.users} ORDER BY IS_STREAMING DESC, ID ASC`, (error_users, results_users) => {
@@ -194,11 +195,22 @@ module.exports = {
 
                         if (!Streaming_User.MessageID) {
                             //Si le message de notif est PAS envoyé
-
                             console.log(colors.green(`MessageID=NULL`))
                             if (guild_user && channel_user) {
-                                //We send the notification here
-                                Util.SQL_Announce_Stream(Streaming_User, dataUser, false)
+                                const Send_Perm = await channel_user.permissionsFor(guild_user.me).has("SEND_MESSAGES")
+                                if (Send_Perm) {
+                                    //We send the notification here
+                                    Util.SQL_Announce_Stream(Streaming_User, dataUser, false)
+                                } else {
+                                    console.log(`I don't have the permission to send the notification`)
+                                    /*
+                                    guild_user.owner.createDM().then(c => {
+                                        var message_to_send = new Discord.RichEmbed()
+                                            .setColor("GREEN")
+                                        c.send(message_to_send)
+                                    })
+                                    */
+                                }
                             }
 
                         } else if (Streaming_User.MessageID != null) {
