@@ -38,11 +38,11 @@ module.exports = {
             embed_getInfo.setDescription(
                 `Hey ${Util.NotifyUser(message.member.id)},
 
-                You are adding a Twitch Channel into your server
-                
-                Provide the **Twitch Channel** to add. 
-                
-                **(30 seconds remaining)**`
+You are adding a Twitch Channel into your server
+
+Provide the **Twitch Channel** to add. 
+
+**(30 seconds remaining)**`
             )
 
             const my_message = await message.channel.send(embed_getInfo)
@@ -76,8 +76,8 @@ module.exports = {
                                     console.log("We should NOT insert it")
                                     embed_Error.setDescription(
                                         `------- **Error** -------
-                                        
-                                        It seems that the TwitchChannel **"${TwitchChannel}"** is already announced in this server!`
+
+It seems that the TwitchChannel **'${TwitchChannel}'** is already announced in this server!`
                                     )
                                     return my_message.edit(embed_Error)
                                     //WE RETURN THAT IT ALREADY EXIST
@@ -88,13 +88,13 @@ module.exports = {
 
                     embed_getInfo.setDescription(
                         `Okay ${Util.NotifyUser(message.member.id)},
-        
-                        I will add the **${TwitchChannel}** twitch channel in this server
 
-                        Provide the Discord Channel (used to send the Twitch notification) 
-                        (Exemple: **${Util.NotifyChannel(message.guild.channels.last().id)}**). 
-                        
-                        **(30 seconds remaining)**`
+I will add the **'${TwitchChannel}'** twitch channel in this server
+
+Provide the **Discord Channel** (used to send the Twitch notification) 
+(Exemple: **${Util.NotifyChannel(message.guild.channels.last().id)}**). 
+
+**(30 seconds remaining)**`
                     )
                     my_message.edit(embed_getInfo)
 
@@ -106,10 +106,10 @@ module.exports = {
                     console.log(collected_Channel_err)
                     embed_Error.setDescription(
                         `------- **Error** -------
-                        
-                        You didn't provide a **Twitch Channel** !
-                        
-                        *Canceling your request...*`
+
+You didn't provide a **Twitch Channel** !
+
+*Canceling your request...*`
                     )
                     my_message.edit(embed_Error)
 
@@ -129,18 +129,17 @@ module.exports = {
                         Discord_Channel = collected_DiscordChannel.first().mentions.channels.first()
                         console.log(Discord_Channel)
 
+                        my_message.react(Util.EmojiGreenTickString).then(() => my_message.react(Util.EmojiRedTickString))
                         embed_getInfo.setDescription(
                             `Okay ${Util.NotifyUser(message.member.id)},
-        
-                            I will put the **${TwitchChannel}** channel's notification into the channel **${Util.NotifyChannel(Discord_Channel.id)}**
 
-                            Now use the reaction on this message, should the notification be **deleted** when **${TwitchChannel}** is OFFLINE ?
-                        
-                            **(30 seconds remaining)**`
+I will put the **${TwitchChannel}** channel's notification into the channel **${Util.NotifyChannel(Discord_Channel.id)}**
+
+Now use the **reaction** on this message, **should the notification be __deleted__ when **${TwitchChannel}** is OFFLINE ?**
+
+**(30 seconds remaining)**`
                         )
                         my_message.edit(embed_getInfo)
-                        my_message.react(Util.EmojiGreenTickString)
-                            .then(my_message.react(Util.EmojiRedTickString))
 
 
                         getReaction_MSG_Delete()
@@ -150,10 +149,10 @@ module.exports = {
                         //my_message.edit(`An error occured: \n${collected_DiscordChannel_err.message}`)
                         embed_Error.setDescription(
                             `------- **Error** -------
-                            
-                            You didn't provide a **Discord Channel** !
-                            
-                            *Canceling your request...*`
+
+You didn't provide a **Discord Channel** !
+
+*Canceling your request...*`
                         )
                         my_message.edit(embed_Error)
                         //Util.SQL_addBannedUsers(userToBan.id, userToBan.user.tag, "None", message.member.id)
@@ -184,7 +183,7 @@ module.exports = {
                                 , message_notification
                             if (r.emoji.name == "✅") {
                                 Remove_MSG_Boolean = 1
-                                message_notification = `When he is **offline** the notification **will __be__ removed.**`
+                                message_notification = `When he is **offline** the notification **will __BE__ removed.**`
                             } else if (r.emoji.name == "❌") {
                                 Remove_MSG_Boolean = 0
                                 message_notification = `When he is **offline** the notification **will __NOT__ be removed.**`
@@ -194,13 +193,13 @@ module.exports = {
                                 console.log("Doesn't exist should be good")
                                 Util.SQL_addNewUser_In_DB_Users("000000000000000000", TwitchChannel, message.guild.id, Discord_Channel.id, Remove_MSG_Boolean)
                                 embed_getInfo.setDescription(
-                                    `Successfully added the new user **'${TwitchChannel}'**
+                                    `✅ Successfully added the new user **'${TwitchChannel}'**
 
-                                    All his notifications will be sended in the channel ${Util.NotifyChannel(Discord_Channel.id)}
+All his notifications will be sended in the channel ${Util.NotifyChannel(Discord_Channel.id)}
 
-                                    ${message_notification}
-                                    
-                                    *Requested by ${Util.NotifyUser(message.author.id)}*`
+${message_notification}
+
+*Requested by ${Util.NotifyUser(message.author.id)}*`
                                 )
                                 my_message.edit(embed_getInfo)
                             } else {
@@ -211,7 +210,7 @@ module.exports = {
                                 if (result.ServerID == message.guild.id) {
                                     console.log("We should NOT insert it")
                                     embed_Error.setDescription(
-                                        `It seems that the TwitchChannel **"${TwitchChannel}"** is already announced in this server!`
+                                        `❌ It seems that the TwitchChannel **"${TwitchChannel}"** is already announced in this server!`
                                     )
                                     return my_message.edit(embed_Error)
                                     //WE RETURN THAT IT ALREADY EXIST
@@ -219,13 +218,13 @@ module.exports = {
                                     console.log("We should insert it")
                                     Util.SQL_addNewUser_In_DB_Users("000000000000000000", TwitchChannel, message.guild.id, Discord_Channel.id, Remove_MSG_Boolean)
                                     embed_getInfo.setDescription(
-                                        `Successfully added the new user **'${TwitchChannel}'**
-    
-                                        All his notifications will be sended in the channel ${Util.NotifyChannel(Discord_Channel.id)}
-    
-                                        ${message_notification}
-                                        
-                                        *Requested by ${Util.NotifyUser(message.author.id)}*`
+                                        `✅ Successfully added the new user **'${TwitchChannel}'**
+
+All his notifications will be sended in the channel ${Util.NotifyChannel(Discord_Channel.id)}
+
+${message_notification}
+
+*Requested by ${Util.NotifyUser(message.author.id)}*`
                                     )
                                     my_message.edit(embed_getInfo)
                                 }
@@ -236,14 +235,14 @@ module.exports = {
 
                 collector.on('end', collected => {
                     if (collected.length == 0) {
-                        my_message.clearReactions()
+                        my_message.clearReactions().catch(console.log(`I don't have the permission to remove the reactions ServerID-${message.guild.id}`))
                         embed_Error.setDescription(
                             `------- **Error** -------
-                        
-                        You didn't provide an answer to the reaction 
-                        (just add a reaction ${Util.EmojiGreenTickString} or ${Util.EmojiRedTickString}) !
-                        
-                        *Canceling your request...*`
+
+You didn't provide an answer to the reaction 
+(just add a reaction ${Util.EmojiGreenTickString} or ${Util.EmojiRedTickString}) !
+
+*Canceling your request...*`
                         )
                         my_message.edit(embed_Error)
                     }
@@ -280,6 +279,7 @@ module.exports = {
         }
 
 
+        /*
         function getChannel() {
             message.channel.awaitMessages(filter, { max: 1, time: 30000, errors: ['time'] })
                 .then(collected_Channel => {
@@ -299,6 +299,7 @@ module.exports = {
                     //Util.SQL_addBannedUsers(userToBan.id, userToBan.user.tag, "None", message.member.id)
                 })
         }
+        */
 
 
     }

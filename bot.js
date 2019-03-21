@@ -66,7 +66,7 @@ bot.once("ready", () => {
     setInterval(async () => {
         Util.SQL_Update_Stream()
     }, 300000);
-    
+
 
     //Util.startupsite()
     console.log(colors.blue("The bot is now ready !"))
