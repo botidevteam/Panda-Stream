@@ -63,9 +63,12 @@ bot.once("ready", () => {
         Util.Verify_Stream_Table()
     }, 5000);
 
+    /*
+    Deprecated, Deleting in version 2.0
     setInterval(async () => {
         Util.SQL_Update_Stream()
     }, 300000);
+    */
 
 
     //Util.startupsite()
