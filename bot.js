@@ -82,15 +82,31 @@ bot.once("ready", () => {
 //#endregion
 
 bot.on("guildCreate", async guild => {
-    bot.con.query(`SELECT * FROM ${Util.db_Model.servers} WHERE ServerID = '${guild.id}`, (error, res) => {
+    con.query(`SELECT * FROM ${Util.db_Model.servers} WHERE ServerID = '${guild.id}'`, (error, res) => {
         if (error || res == null) {
-            bot.con.query(`INSERT INTO ${Util.db_Model.servers} (ServerName, ServerID, ServerOwnerID, ServerPrefix, ServerLang) VALUES (?, ?, ?, ?, ?)`, [guild.name, guild.id, guild.ownerID, config.prefix, "english"], (err, results) => {
+            con.query(`INSERT INTO ${Util.db_Model.servers} (ServerName, ServerID, ServerOwnerID, ServerPrefix, ServerLang) VALUES (?, ?, ?, ?, ?)`, [guild.name, guild.id, guild.ownerID, config.prefix, "english"], (err, results) => {
                 if (err) console.log(err);
                 console.log(colors.green("Inserted the new server !"));
             });
         }
     })
 
+})
+
+bot.on("guildUpdate", async (oldguild, newguild) => {
+    con.query(`SELECT * FROM ${Util.db_Model.servers} WHERE ServerID = '${newguild.id}'`, (error, res) => {
+        if (error) { console.error(error) }
+
+        //console.log(newguild.name)
+        //console.log(res[0].ServerName)
+        if (res[0].ServerName != newguild.name) {
+            //console.log("Not the same")
+            con.query(`UPDATE ${Util.db_Model.servers} SET ServerName = '${newguild.name}' WHERE ServerID = '${newguild.id}'`, (err, results) => {
+                if (err) { console.error(err) }
+            })
+            console.log(colors.green(`Updated the server '${newguild.name}' because of the ServerName change`));
+        }
+    })
 })
 
 bot.on("message", async message => {
