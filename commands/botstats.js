@@ -12,7 +12,7 @@ module.exports = {
         var message = call.message
             , member = call.message.member
 
-        let embed = new Discord.RichEmbed()
+        let embed = new Discord.MessageEmbed()
             .setTitle('Bot stats')
             .addField('Bot Uptime', Util.time_Into_String(bot.uptime))
             .addField('Version', config.version)

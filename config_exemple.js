@@ -2,7 +2,7 @@ module.exports = {
     token: "TOKEN",
     prefix: "=",
     prefixLog: "[!]",
-    version: "1.0",
+    version: "1.1",
 
     //#region SQL
     MySQL_host: "IP ADDRESS",

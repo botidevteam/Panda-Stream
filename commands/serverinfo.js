@@ -13,7 +13,7 @@ module.exports = {
             , author = call.message.author
             , guild = call.message.guild
 
-        const embed = new discord.RichEmbed()
+        const embed = new discord.MessageEmbed()
             .setTitle("Server info")
             .setAuthor(message.author)
             .addField("users", guild.members.memberCount, true)

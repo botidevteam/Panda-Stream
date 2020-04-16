@@ -14,6 +14,8 @@ const Discord = require("discord.js")
 
 //BOT VARIABLE
 const Util = require("./Util")
+const i18n = require("./i18n")
+let ServerLang = ""
 
 const twitch = new TwitchPKG({
     id: config.twitch_id,
@@ -44,24 +46,25 @@ bot.once("ready", () => {
             `${config.prefixLog} Bot created by BotiDevTeam\n` +
             `${config.prefixLog} All rights are Reserved\n` +
             `${config.prefixLog} The bot is ready\n` +
+            `Connected as ${bot.user.tag}\n` +
             "---------------------------------"))
     //--------------------------
     bot.user.setStatus("online")
     bot.user.setActivity(`${config.prefix}help | Started and ready!`, { type: "STREAMING", url: "https://twitch.tv/RisedSky_FR" })
 
-    for (var i in bot.guilds.array()) {
-        console.log(colors.cyan(`Server number ${i} » '${bot.guilds.array()[i]}'`))
+    for (var i in bot.guilds.array) {
+        console.log(colors.cyan(`Server number ${i} » '${bot.guilds.array[i]}'`))
     }
 
     Util.SQL_Instance_Erase() //Delete all the data from the instance table
 
     setInterval(async () => {
         Util.Verify_New_Streamers()
-    }, 1000);
+    }, 5000);
 
     setInterval(async () => {
         Util.Verify_Stream_Table()
-    }, 5000);
+    }, 10000);
 
     /*
     Deprecated, Deleting in version 2.0
@@ -110,33 +113,36 @@ bot.on("guildUpdate", async (oldguild, newguild) => {
 })
 
 bot.on("message", async message => {
+    if (!message.guild) return;
     if (message.author.bot) return;
     //#region Bot Permissions
-    bot.BOT_SEND_MESSAGESPerm = await message.guild.channels.find(c => c.id === message.channel.id).permissionsFor(message.guild.me).has("SEND_MESSAGES") && message.channel.type === 'text'
-    bot.BOT_MANAGE_MESSAGESPerm = await message.guild.channels.find(c => c.id === message.channel.id).permissionsFor(message.guild.me).has("MANAGE_MESSAGES") && message.channel.type === 'text'
-    bot.BOT_ADMINISTRATORPerm = await message.guild.channels.find(c => c.id === message.channel.id).permissionsFor(message.guild.me).has("ADMINISTRATOR") && message.channel.type === 'text'
-    bot.BOT_USE_EXTERNAL_EMOJISPerm = await message.guild.channels.find(c => c.id === message.channel.id).permissionsFor(message.guild.me).has("USE_EXTERNAL_EMOJIS") && message.channel.type === 'text'
-    bot.BOT_ADD_REACTIONSPerm = await message.guild.channels.find(c => c.id === message.channel.id).permissionsFor(message.guild.me).has("ADD_REACTIONS") && message.channel.type === 'text'
+    bot.BOT_SEND_MESSAGESPerm = await message.guild.channels.resolve(message.channel.id).permissionsFor(message.guild.me).has("SEND_MESSAGES") && message.channel.type === 'text'
+    bot.BOT_MANAGE_MESSAGESPerm = await message.guild.channels.resolve(message.channel.id).permissionsFor(message.guild.me).has("MANAGE_MESSAGES") && message.channel.type === 'text'
+    bot.BOT_ADMINISTRATORPerm = await message.guild.channels.resolve(message.channel.id).permissionsFor(message.guild.me).has("ADMINISTRATOR") && message.channel.type === 'text'
+    bot.BOT_USE_EXTERNAL_EMOJISPerm = await message.guild.channels.resolve(message.channel.id).permissionsFor(message.guild.me).has("USE_EXTERNAL_EMOJIS") && message.channel.type === 'text'
+    bot.BOT_ADD_REACTIONSPerm = await message.guild.channels.resolve(message.channel.id).permissionsFor(message.guild.me).has("ADD_REACTIONS") && message.channel.type === 'text'
     //#endregion
 
     //#region User Permissions
-    bot.member_Has_ADMINISTRATOR = await message.guild.channels.find(c => c.id === message.channel.id).permissionsFor(message.member).has("ADMINISTRATOR") && message.channel.type === 'text'
-    bot.member_Has_BAN_MEMBERS = await message.guild.channels.find(c => c.id === message.channel.id).permissionsFor(message.member).has("BAN_MEMBERS") && message.channel.type === 'text'
-    bot.member_Has_KICK_MEMBERS = await message.guild.channels.find(c => c.id === message.channel.id).permissionsFor(message.member).has("KICK_MEMBERS") && message.channel.type === 'text'
-    bot.member_Has_MANAGE_GUILD = await message.guild.channels.find(c => c.id === message.channel.id).permissionsFor(message.member).has("MANAGE_GUILD") && message.channel.type === 'text'
-    bot.member_Has_MANAGE_MESSAGES = await message.guild.channels.find(c => c.id === message.channel.id).permissionsFor(message.member).has("MANAGE_MESSAGES") && message.channel.type === 'text'
-    bot.member_Has_MANAGE_CHANNELS = await message.guild.channels.find(c => c.id === message.channel.id).permissionsFor(message.member).has("MANAGE_CHANNELS") && message.channel.type === 'text'
+    bot.member_Has_ADMINISTRATOR = await message.guild.channels.resolve(message.channel.id).permissionsFor(message.member).has("ADMINISTRATOR") && message.channel.type === 'text'
+    bot.member_Has_BAN_MEMBERS = await message.guild.channels.resolve(message.channel.id).permissionsFor(message.member).has("BAN_MEMBERS") && message.channel.type === 'text'
+    bot.member_Has_KICK_MEMBERS = await message.guild.channels.resolve(message.channel.id).permissionsFor(message.member).has("KICK_MEMBERS") && message.channel.type === 'text'
+    bot.member_Has_MANAGE_GUILD = await message.guild.channels.resolve(message.channel.id).permissionsFor(message.member).has("MANAGE_GUILD") && message.channel.type === 'text'
+    bot.member_Has_MANAGE_MESSAGES = await message.guild.channels.resolve(message.channel.id).permissionsFor(message.member).has("MANAGE_MESSAGES") && message.channel.type === 'text'
+    bot.member_Has_MANAGE_CHANNELS = await message.guild.channels.resolve(message.channel.id).permissionsFor(message.member).has("MANAGE_CHANNELS") && message.channel.type === 'text'
     //#endregion
 
     Util.SQL_GetResult(Util.db_Model.servers, "ServerID", message, message.member).then(async results => {
         if (results == null || results == undefined || results == "") return
         /**
          * @param results.ServerID The server ID
-         * @param results.ServerLang The server lag
+         * @param results.ServerLang The server lang
          * @param results.ServerName The server name
          * @param results.ServerOwnerID The server owner ID
          * @param results.ServerPrefix The server prefix
          */
+
+        ServerLang = results.ServerLang
 
         const server_prefix = await results.ServerPrefix
             //, cmd = await message.content.slice(config.prefix.length).trim().split(/ +/g).shift()
@@ -167,8 +173,11 @@ bot.on("message", async message => {
                 }
 
             Util.SQL_getBanInfo(message.author.id).then(results => {
-                if (!results) { console.log("Not banned") }
-                else { return console.log(results) }
+                if (!results) {
+                    console.log("Not banned")
+                } else {
+                    return console.log(results)
+                }
             })
             //if (Util.SQL_getBanInfo(message.author.id).includes(message.author.id)) return console.log(colors.green(`'${message.author.tag}' is a banned user`);
 
@@ -176,19 +185,20 @@ bot.on("message", async message => {
             if (commandFile != null) {
                 if (message.channel.type !== "dm" || (commandFile.help.dm || false)) {
                     commandFile.run(new Call(message, bot, bot.commands, server_args, server_content, server_prefix, server_cmd));
-                } else message.reply("This command is not working in DM.").catch(() => { });
+                } else message.reply(i18n.function(results.ServerLang).Command_Not_Working_In_DM).catch(() => { });
             }
 
             //IF THE COMMAND IS FROM THE DEFAULT PREFIX THEN
         } else if (message.content.startsWith(default_prefix) && !message.author.bot) {
             console.log(colors.green(`Detected the prefix ${default_prefix}`))
-            if (message.channel.topic)
+            if (message.channel.topic) {
                 if (String(message.channel.topic).toLowerCase().includes(":nocmds:")) {
                     if (!bot.member_Has_ADMINISTRATOR) {
                         message.author.send(`The channnel ${Util.NotifyChannel(message.channel.id)} has a \`:nocmds:\` tag and you not allowed to send any commands in this channel.`);
                         return message.delete(1250);
                     }
                 }
+            }
 
 
             Util.SQL_getBanInfo(message.author.id).then(results => {
@@ -201,7 +211,9 @@ bot.on("message", async message => {
             if (commandFile != null) {
                 if (message.channel.type !== "dm" || (commandFile.help.dm || false)) {
                     commandFile.run(new Call(message, bot, bot.commands, default_args, default_content, default_prefix, default_cmd));
-                } else message.reply("This command is not working in DM.").catch(() => { });
+                } else {
+                    message.reply(i18n.function(results.ServerLang).Command_Not_Working_In_DM).catch(() => { });
+                }
             }
         }
     })
@@ -245,46 +257,7 @@ function ChangeState1() {
 }
 
 function ChangeState2() {
-    var time = moment.duration(bot.uptime, "milliseconds");
-    var time_string;
-    let time_var = {
-        d: "",
-        h: "",
-        m: "",
-        s: ""
-    }
-
-    if (time.get("days") > 1) { time_var.d = "days" }
-    else if (time.get("days") == 1) { time_var.d = "day" }
-
-    if (time.get("hours") > 1) { time_var.h = "hours" }
-    else if (time.get("hours") == 1) { time_var.h = "hour" }
-
-    if (time.get("minutes") > 1) { time_var.m = "minutes" }
-    else if (time.get("minutes") == 1) { time_var.m = "minute" }
-
-    if (time.get("seconds") > 1) { time_var.s = "seconds" }
-    else if (time.get("seconds") == 1) { time_var.s = "second" }
-
-
-    if (time.get("days") >= 1) {
-        time_string = `${time.get("days")} ${time_var.d}`
-        if (time_var.h) { time_string += `, ${time.get("hours")} ${time_var.h}` }
-        if (time_var.m) { time_string += `, ${time.get("minutes")} ${time_var.m}` }
-        if (time_var.s) { time_string += `, ${time.get("s")} ${time_var.s}.` }
-
-    } else if (time.get("hours") >= 1) {
-        time_string = `${time.get("hours")} ${time_var.h}`
-        if (time_var.m) { time_string += `, ${time.get("minutes")} ${time_var.m}` }
-        if (time_var.s) { time_string += `, ${time.get("s")} ${time_var.s}.` }
-
-    } else if (time.get("minutes") >= 1) {
-        time_string = `${time.get("minutes")} ${time_var.m}`
-        if (time_var.s) { time_string += `, ${time.get("s")} ${time_var.s}.` }
-
-    } else if (time.get("seconds") >= 1) {
-        time_string = `${time.get("seconds")} ${time_var.s}.`
-    }
+    var time_string = Util.time_Into_String(bot.uptime)
 
     //console.log(colors.green(time_string)
     bot.user.setActivity(`${config.prefix}help | Launched since ${time_string}`, { type: "STREAMING", url: "https://twitch.tv/RisedSky_FR" })
@@ -343,4 +316,4 @@ class Call {
 //#endregion
 //#endregion
 
-module.exports = { bot, Call, con, twitch }
+module.exports = { bot, Call, con, twitch, i18n, ServerLang }

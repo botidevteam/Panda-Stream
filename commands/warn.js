@@ -14,7 +14,7 @@ module.exports = {
 
 
         let rUser = message.guild.member(message.mentions.users.first() || message.guild.members.get(call.args[0]));
-        let embed = new Discord.RichEmbed()
+        let embed = new Discord.MessageEmbed()
             .setDescription("Предупреждение")
             .setColor('#e22216')
             .addField("Administator: ", message.author.username)

@@ -11,7 +11,7 @@ module.exports = {
             , Discord = require("discord.js")
 
         /*
-        let embed_to_send = new Discord.RichEmbed()
+        let embed_to_send = new Discord.MessageEmbed()
             .setColor("PURPLE")
             .setFooter(`${bot.bot.user.username} is a streaming bot | Best Streaming Latence`, bot.bot.user.avatarURL)
             .setTimestamp()
@@ -55,7 +55,7 @@ module.exports = {
 
                         switch (Streaming_User.Compact_Mode) {
                             case 1:
-                                embed_to_send = new Discord.RichEmbed()
+                                embed_to_send = new Discord.MessageEmbed()
                                     .setColor("PURPLE")
                                     .setTitle(dataStream.stream.channel.name)
                                     .setURL(dataStream.stream.channel.url)
@@ -67,7 +67,7 @@ module.exports = {
                                 break;
 
                             case 0:
-                                embed_to_send = new Discord.RichEmbed()
+                                embed_to_send = new Discord.MessageEmbed()
                                     .setColor("PURPLE")
                                     .setTitle(`${dataStream.stream.channel.name} is now streaming!`)// , `https://i.ibb.co/NF3XdbK/twitch-logo.jpg`)
                                     .setURL(dataStream.stream.channel.url)
@@ -82,8 +82,8 @@ module.exports = {
                                 break;
                         }
 
-                        const User_Server = bot.bot.guilds.find(g => g.id == Streaming_User.ServerID)
-                        const User_Channel = bot.bot.channels.find(c => c.id == Streaming_User.ChannelID)
+                        const User_Server = bot.bot.guilds.resolve(Streaming_User.ServerID)
+                        const User_Channel = bot.bot.channels.resolve(Streaming_User.ChannelID)
 
                         if (User_Channel && User_Channel.type == "text") {
                             User_Channel.fetchMessage(Streaming_User.MessageID)

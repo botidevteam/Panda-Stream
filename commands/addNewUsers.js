@@ -2,7 +2,7 @@ module.exports = {
     help: {
         //What the command will look || =addBannedUsers
         name: "addNewUsers",
-        aliases: ["addNU"]
+        aliases: ["addNU", "addnewuser", "addnewusers"]
     },
     run: async (call) => {
         const Util = require("../Util")

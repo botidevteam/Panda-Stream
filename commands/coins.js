@@ -14,7 +14,7 @@ module.exports = {
         let coins = Util.SQL_GetUserStats(author.id);
 
         //:lulz: - 549654952457404416
-        let embed = new discord.RichEmbed()
+        let embed = new discord.MessageEmbed()
             .setDescription('Profile')
             .setColor('#c8385a')
             .addField("🌝 Coins", Util.EmojiThinkingString)

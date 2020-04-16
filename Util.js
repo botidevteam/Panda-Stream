@@ -45,6 +45,7 @@ module.exports = {
     log_test: require("./functions/log_test").function,
 
     SQL_GetResult: require("./functions/SQL_GetResult").function,
+    SQL_GetServerID: require("./functions/SQL_GetServerID").function,
     SQL_getBanInfo: require("./functions/SQL_getBanInfo").function,
     SQL_GetUserStats: require("./functions/SQL_GetUserStats").function,
 

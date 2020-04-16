@@ -4,7 +4,7 @@ module.exports = {
             , Util = require("../Util")
             , Discord = require("discord.js")
 
-        var embed = new Discord.RichEmbed()
+        var embed = new Discord.MessageEmbed()
         .setDescription(
             `It seems that you need some help for the command ${command}
             To use ${command}

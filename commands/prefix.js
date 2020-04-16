@@ -23,11 +23,11 @@ module.exports = {
              * @param results.ServerOwnerID The server owner ID
              * @param results.ServerPrefix The server prefix
              */
-            let embed_help = new Discord.RichEmbed()
+            let embed_help = new Discord.MessageEmbed()
                 .setColor("ORANGE")
                 .setFooter(`Command Requested by ${message.member.user.tag}`)
 
-            let embed = new Discord.RichEmbed()
+            let embed = new Discord.MessageEmbed()
                 .setColor("GREEN")
                 .setAuthor(`The prefix of the server`, message.member.user.avatarURL)
                 .setDescription(`The current prefix of this server is
@@ -36,12 +36,12 @@ module.exports = {
                 )
                 .setFooter(`Command Requested by ${message.member.user.tag}`)
 
-            let embed_message_good = new Discord.RichEmbed()
+            let embed_message_good = new Discord.MessageEmbed()
                 .setColor("GREEN")
                 .setAuthor(`The prefix of the server`, message.member.user.avatarURL)
                 .setFooter(`Command Requested by ${message.member.user.tag}`)
 
-            let embed_message_warn = new Discord.RichEmbed()
+            let embed_message_warn = new Discord.MessageEmbed()
                 .setColor("GREEN")
                 .setAuthor(`The prefix of the server`, message.member.user.avatarURL)
                 .setFooter(`Command Requested by ${message.member.user.tag}`)

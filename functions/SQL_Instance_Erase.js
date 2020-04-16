@@ -17,7 +17,7 @@ module.exports = {
               * @param results.StatsErrors
               * @param results.StatsGood
               */
-            if (err) console.log(err);
+            if (err) return console.log(err);
             bot.con.query(`UPDATE ${Util.db_Model.instancestats} SET StreamMSG_Announced = 0 WHERE ID = 1`)
             bot.con.query(`UPDATE ${Util.db_Model.instancestats} SET StreamMSG_Deleted = 0 WHERE ID = 1`)
             bot.con.query(`UPDATE ${Util.db_Model.instancestats} SET StatsErrors = 0 WHERE ID = 1`)

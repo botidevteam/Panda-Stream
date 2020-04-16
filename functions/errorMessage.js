@@ -9,7 +9,7 @@ module.exports = {
             , Util = require("../Util")
             , discord = require("discord.js")
 
-        var embed_txt = new discord.RichEmbed()
+        var embed_txt = new discord.MessageEmbed()
         if (cmd_name) {
             embed_txt.setColor("RED")
                 .setDescription(`Error in your ${cmd_name}!\n\n${error.message}`)

@@ -17,7 +17,7 @@ module.exports = {
              * @param results_users.COINS
              */
 
-            if (error_users) console.error(error_users);
+            if (error_users) return console.log(error_users);
 
             const Streaming_User = []
             results_users.forEach(i_u => {
@@ -107,6 +107,7 @@ module.exports = {
                     * @param results.MessageID
                     * @param results.Stream_Text
                     * @param results.Remove_MSG_On_End
+                    * @param results.Compact_Mode
                     * @param results.IS_STREAMING
                     * @param results.COINS
                     */
@@ -147,7 +148,7 @@ module.exports = {
                     is_playlist: false
                     stream_type:"live"
                     video_height:1080
-                    viewers:8653
+                    viewers:  8653
                     * */
 
                     //console.log(dataUser)
@@ -168,24 +169,27 @@ module.exports = {
 
 
 
-                        var guild_user = bot.bot.guilds.find(g => g.id == Streaming_User.ServerID)
+                        //var guild_user = bot.bot.guilds.resolve(Streaming_User.ServerID)
+                        let guild_user = bot.bot.guilds.resolve(Streaming_User.ServerID)
+
                         if (!guild_user) {
                             //If the ServerID isn't findable
                             console.log(colors.green(`Can't find the ServerID of the user data`))
                             Delete_User_data_and_Streaming_Status(Streaming_User)
-                            const User = bot.bot.users.find(u => u.id == Streaming_User.UserID)
+                            const User = bot.bot.users.resolve(Streaming_User.UserID)
                             if (User) {
                                 User.createDM().then(Util.SQL_DM_Invalid(Streaming_User.UserID, Streaming_User, "ServerID"))
                             }
                             return;
                         }
 
-                        var channel_user = guild_user.channels.find(c => c.id == Streaming_User.ChannelID)
+                        //var channel_user = guild_user.channels.resolve(Streaming_User.ChannelID)
+                        let channel_user = guild_user.channels.resolve(Streaming_User.ChannelID)
                         if (!channel_user) {
                             //If the ChannelID isn't findable
                             console.log(colors.green(`Can't find the ChannelID of the user data`))
                             Delete_User_data_and_Streaming_Status(Streaming_User)
-                            const User = bot.bot.users.find(u => u.id == Streaming_User.UserID)
+                            const User = bot.bot.users.resolve(Streaming_User.UserID)
                             if (User) {
                                 User.createDM().then(Util.SQL_DM_Invalid(Streaming_User.UserID, Streaming_User, "ChannelID"))
                             }
@@ -205,7 +209,7 @@ module.exports = {
                                     console.log(`I don't have the permission to send the notification`)
                                     /*
                                     guild_user.owner.createDM().then(c => {
-                                        var message_to_send = new Discord.RichEmbed()
+                                        var message_to_send = new Discord.MessageEmbed()
                                             .setColor("GREEN")
                                         c.send(message_to_send)
                                     })
@@ -216,12 +220,16 @@ module.exports = {
                         } else if (Streaming_User.MessageID != null) {
                             //Si le message de notif EST envoyé
                             //console.log(colors.green(`MessageID=${Streaming_User.MessageID}`))
-                            var message_user = channel_user.fetchMessage(Streaming_User.MessageID)
+                            var message_user = channel_user.fetch(Streaming_User.MessageID)
                                 .then(async msg => {
                                     //console.log(colors.green("Finded the msg"))
                                     //msg.edit("TEST DE OUF")
                                 })
-                                .catch(console.error);
+                                .catch(error => {
+                                    console.error(`Can't find the MessageID of the user - '${Streaming_User.UserTwitch}'`)
+                                    console.log(colors.cyan(`Re-Sending the message!`))
+                                    Util.SQL_Announce_Stream(Streaming_User, dataUser, Streaming_User.Compact_Mode)
+                                });
 
                             if (guild_user && channel_user && message_user) {
                                 //console.log(colors.green(message_user)
@@ -245,21 +253,21 @@ module.exports = {
                 if (error) console.error(error)
             })
 
-            bot.con.query(`DELETE FROM ${Util.db_Model.queue} WHERE UserTwitch = '${Streaming_User.UserTwitch}'`, (error) => {
+            bot.con.query(`DELETE FROM ${Util.db_Model.queue} WHERE UserTwitch = '${Streaming_User.UserTwitch}' AND ServerID = '${Streaming_User.ServerID}' AND ChannelID = '${Streaming_User.ChannelID}'`, (error) => {
                 if (error) console.error(error)
             })
 
             if (Streaming_User.MessageID) {
                 console.log(colors.green(`Deleting the announced message of the channelID`))
 
-                var channel_user = bot.bot.channels.find(c => c.id == Streaming_User.ChannelID)
+                var channel_user = bot.bot.channels.resolve(Streaming_User.ChannelID)
                 if (channel_user) {
                     channel_user.fetchMessage(Streaming_User.MessageID)
                         .then(async msg => {
                             console.log(colors.green("Finded the msg"))
                             await msg.delete()
                         })
-                        .catch(console.log("Didn't find the message"));
+                        .catch(console.log(colors.cyan("Didn't found the message")));
                 }
             }
         }

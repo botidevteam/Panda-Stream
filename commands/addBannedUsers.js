@@ -36,7 +36,7 @@ module.exports = {
 
                     if (!parseInt(collected_ID.first().content)) { return message.reply("That's not an ID !") }
 
-                    userToBan = bot.bot.users.find(u => u.id == collected_ID.first().content)
+                    userToBan = bot.bot.users.resolve(collected_ID.first().content)
 
                     if (!userToBan) {
                         userToBan = collected_ID.first().content
