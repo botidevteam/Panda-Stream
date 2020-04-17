@@ -56,15 +56,15 @@ bot.once("ready", () => {
         console.log(colors.cyan(`Server number ${i} » '${bot.guilds.array[i]}'`))
     }
 
-    Util.SQL_Instance_Erase() //Delete all the data from the instance table
+    Util.SQL_Instance_Erase(); //Delete all the data from the instance table
 
     setInterval(async () => {
-        Util.Verify_New_Streamers()
-    }, 5000);
+        Util.Verify_New_Streamers();
+    }, 30 * 1000); //30 sec
 
     setInterval(async () => {
-        Util.Verify_Stream_Table()
-    }, 10000);
+        Util.Verify_Stream_Table();
+    }, 60 * 1000); //60 sec
 
     /*
     Deprecated, Deleting in version 2.0

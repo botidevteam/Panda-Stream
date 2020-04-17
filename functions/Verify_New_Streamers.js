@@ -18,13 +18,13 @@ module.exports = {
 
             if (error_users) return console.log(error_users);
 
-            const Check_Streaming_User = []
+            const Check_Streaming_User = [];
 
             results_users.forEach(i_u => {
-                if (!i_u.IS_STREAMING) Check_Streaming_User.push(i_u)
+                if (!i_u.IS_STREAMING) { Check_Streaming_User.push(i_u); }
             });
 
-            if (Check_Streaming_User == "" || Check_Streaming_User == null || Check_Streaming_User == undefined) return //console.log(`Nothing in the Streaming_User`)
+            if (Check_Streaming_User == "" || Check_Streaming_User == null || Check_Streaming_User == undefined) return; //console.log(`Nothing in the Streaming_User`)
             //Will prevent any call in the db for nothing if nobody is streaming
 
             //console.log(Check_Streaming_User)
