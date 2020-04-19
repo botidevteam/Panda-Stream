@@ -82,5 +82,6 @@ module.exports = {
     NotifyChannel: require("./functions/NotifyChannel").function,
     deleteMyMessage: require("./functions/deleteMyMessage").function,
     CheckInfo_ToBooleanEmoji: require("./functions/CheckInfo_ToBooleanEmoji").function,
-    time_Into_String: require("./functions/time_Into_String").function
+    time_Into_String: require("./functions/time_Into_String").function,
+    restartTimer: require("./functions/restartTimer").function
 }

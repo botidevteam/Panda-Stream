@@ -223,8 +223,11 @@ module.exports = {
                     }
                 })
                 .catch(error => {
-                    console.error(error)
-                    console.error(Streaming_User.UserTwitch)
+                    console.error(error);
+                    console.error("Detected a rate limit of the API, reducing the call from now");
+                    Util.restartTimer(Util.Verify_New_Streamers, 120, 120000, "interval");
+                    console.log(colors.red("Rate Limit the function Verify_New_Streamers"))
+                    //console.error(Streaming_User.UserTwitch)
                 })
         }
 

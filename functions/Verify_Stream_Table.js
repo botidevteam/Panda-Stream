@@ -242,19 +242,22 @@ module.exports = {
                     }
                 })
                 .catch(error => {
-                    console.error(error)
-                    console.error(Streaming_User.UserTwitch)
+                    console.error(error);
+                    console.error("Detected a rate limit of the API, reducing the call from now");
+                    Util.restartTimer(Util.Verify_Stream_Table, 60, 60000, "interval");
+                    console.log(colors.red("Rate Limit the function Verify_Stream_Table"))
+                    //console.error(Streaming_User.UserTwitch)
                 })
         }
 
         function Delete_User_data_and_Streaming_Status(Streaming_User) {
-            console.log(colors.green(`Deleting the data of the user ${Streaming_User.UserID} - ${Streaming_User.UserTwitch}`))
+            console.log(colors.green(`Deleting the data of the user ${Streaming_User.UserID} - ${Streaming_User.UserTwitch}`));
             bot.con.query(`UPDATE ${Util.db_Model.users} SET IS_STREAMING = '0' WHERE UserTwitch = '${Streaming_User.UserTwitch}' AND ServerID = '${Streaming_User.ServerID}' AND ChannelID = '${Streaming_User.ChannelID}'`, (error) => {
-                if (error) console.error(error)
+                if (error) console.error(error);
             })
 
             bot.con.query(`DELETE FROM ${Util.db_Model.queue} WHERE UserTwitch = '${Streaming_User.UserTwitch}' AND ServerID = '${Streaming_User.ServerID}' AND ChannelID = '${Streaming_User.ChannelID}'`, (error) => {
-                if (error) console.error(error)
+                if (error) console.error(error);
             })
 
             if (Streaming_User.MessageID) {
@@ -262,8 +265,9 @@ module.exports = {
 
                 var channel_user = bot.bot.channels.resolve(Streaming_User.ChannelID)
                 if (channel_user) {
-                    channel_user.fetchMessage(Streaming_User.MessageID)
+                    channel_user.fetch(Streaming_User.MessageID)
                         .then(async msg => {
+                            console.log("++" + msg)
                             console.log(colors.green("Finded the msg"))
                             await msg.delete()
                         })
