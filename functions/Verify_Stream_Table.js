@@ -220,7 +220,7 @@ module.exports = {
                         } else if (Streaming_User.MessageID != null) {
                             //Si le message de notif EST envoyé
                             //console.log(colors.green(`MessageID=${Streaming_User.MessageID}`))
-                            var message_user = channel_user.fetch(Streaming_User.MessageID)
+                            var message_user = channel_user.messages.fetch(Streaming_User.MessageID)
                                 .then(async msg => {
                                     //console.log(colors.green("Finded the msg"))
                                     //msg.edit("TEST DE OUF")
@@ -263,9 +263,9 @@ module.exports = {
             if (Streaming_User.MessageID) {
                 console.log(colors.green(`Deleting the announced message of the channelID`))
 
-                var channel_user = bot.bot.channels.resolve(Streaming_User.ChannelID)
+                var channel_user = bot.bot.channels.resolve(Streaming_User.ChannelID);
                 if (channel_user) {
-                    channel_user.fetch(Streaming_User.MessageID)
+                    channel_user.messages.fetch(Streaming_User.MessageID)
                         .then(async msg => {
                             console.log("++" + msg)
                             console.log(colors.green("Finded the msg"))
