@@ -6,7 +6,7 @@ module.exports = {
     notAllowedCommand_Description: `You are not allowed to use the **{1}** command\nYou need the permission **{2}** !`,
 
     Announce_No_GameData_Found: `Nothing (No data found in his profile)`,
-    Announce_Footer_Pub: `is a streaming bot | Best Streaming Latence`,
+    Announce_Footer_Pub: `is a streaming bot | With the best streaming latence`,
     Announce_Now_Streaming: `is now streaming!`,
     Announce_Now_Playing: `Now Playing`,
     Announce_Stream_Title: `Stream Title`,

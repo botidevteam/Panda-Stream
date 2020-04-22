@@ -119,11 +119,9 @@ module.exports = {
              * @param Streaming_User The Streaming User variable
              */
 
+            //bot.twitch.getUser("squeezielive")
             bot.twitch.getUser(Streaming_User.UserTwitch)
-                //bot.twitch.getUser("squeezielive")
-                .then(async data => {
-                    const dataUser = await data;
-
+                .then(dataUser => {
                     /* *
                     _id: 33166101328
                     average_fps: 60
@@ -148,13 +146,13 @@ module.exports = {
                     //console.log(dataUser)
                     if (dataUser.stream == null || dataUser.stream == undefined) {
                         //console.log(colors.green(`dataUser=NULL`))
-                        return Delete_User_data_and_Streaming_Status(Streaming_User)
+                        return Delete_User_data_and_Streaming_Status(Streaming_User);
                     } else {
                         //console.log(colors.green(`dataUser!=NULL`))
                         //console.log(colors.green("il devrait stream normalement !"))
                         //console.log(colors.green(dataUser.stream.channel.name))
 
-                        var guild_user = bot.bot.guilds.resolve(Streaming_User.ServerID)
+                        var guild_user = bot.bot.guilds.resolve(Streaming_User.ServerID);
                         if (!guild_user) {
                             //If the ServerID isn't findable
                             console.log(colors.green(`Can't find the ServerID of the user data`))

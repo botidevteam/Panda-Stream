@@ -66,12 +66,12 @@ bot.once("ready", () => {
         Util.Verify_Stream_Table();
     }, 60 * 1000); //60 sec
 
-    /*
-    Deprecated, Deleting in version 2.0
+
+    //Reprecated, it is very useful
     setInterval(async () => {
         Util.SQL_Update_Stream()
-    }, 300000);
-    */
+    }, 300 * 1000);
+
 
 
     //Util.startupsite()
@@ -116,24 +116,24 @@ bot.on("message", async message => {
     if (!message.guild) return;
     if (message.author.bot) return;
     //#region Bot Permissions
-    bot.BOT_SEND_MESSAGESPerm = await message.guild.channels.resolve(message.channel.id).permissionsFor(message.guild.me).has("SEND_MESSAGES") && message.channel.type === 'text'
-    bot.BOT_MANAGE_MESSAGESPerm = await message.guild.channels.resolve(message.channel.id).permissionsFor(message.guild.me).has("MANAGE_MESSAGES") && message.channel.type === 'text'
-    bot.BOT_ADMINISTRATORPerm = await message.guild.channels.resolve(message.channel.id).permissionsFor(message.guild.me).has("ADMINISTRATOR") && message.channel.type === 'text'
-    bot.BOT_USE_EXTERNAL_EMOJISPerm = await message.guild.channels.resolve(message.channel.id).permissionsFor(message.guild.me).has("USE_EXTERNAL_EMOJIS") && message.channel.type === 'text'
-    bot.BOT_ADD_REACTIONSPerm = await message.guild.channels.resolve(message.channel.id).permissionsFor(message.guild.me).has("ADD_REACTIONS") && message.channel.type === 'text'
+    bot.BOT_SEND_MESSAGESPerm = await message.channel.permissionsFor(message.guild.me).has("SEND_MESSAGES") && message.channel.type === 'text'
+    bot.BOT_MANAGE_MESSAGESPerm = await message.channel.permissionsFor(message.guild.me).has("MANAGE_MESSAGES") && message.channel.type === 'text'
+    bot.BOT_ADMINISTRATORPerm = await message.channel.permissionsFor(message.guild.me).has("ADMINISTRATOR") && message.channel.type === 'text'
+    bot.BOT_USE_EXTERNAL_EMOJISPerm = await message.channel.permissionsFor(message.guild.me).has("USE_EXTERNAL_EMOJIS") && message.channel.type === 'text'
+    bot.BOT_ADD_REACTIONSPerm = await message.channel.permissionsFor(message.guild.me).has("ADD_REACTIONS") && message.channel.type === 'text'
     //#endregion
 
     //#region User Permissions
-    bot.member_Has_ADMINISTRATOR = await message.guild.channels.resolve(message.channel.id).permissionsFor(message.member).has("ADMINISTRATOR") && message.channel.type === 'text'
-    bot.member_Has_BAN_MEMBERS = await message.guild.channels.resolve(message.channel.id).permissionsFor(message.member).has("BAN_MEMBERS") && message.channel.type === 'text'
-    bot.member_Has_KICK_MEMBERS = await message.guild.channels.resolve(message.channel.id).permissionsFor(message.member).has("KICK_MEMBERS") && message.channel.type === 'text'
-    bot.member_Has_MANAGE_GUILD = await message.guild.channels.resolve(message.channel.id).permissionsFor(message.member).has("MANAGE_GUILD") && message.channel.type === 'text'
-    bot.member_Has_MANAGE_MESSAGES = await message.guild.channels.resolve(message.channel.id).permissionsFor(message.member).has("MANAGE_MESSAGES") && message.channel.type === 'text'
-    bot.member_Has_MANAGE_CHANNELS = await message.guild.channels.resolve(message.channel.id).permissionsFor(message.member).has("MANAGE_CHANNELS") && message.channel.type === 'text'
+    bot.member_Has_ADMINISTRATOR = await message.channel.permissionsFor(message.member).has("ADMINISTRATOR") && message.channel.type === 'text'
+    bot.member_Has_BAN_MEMBERS = await message.channel.permissionsFor(message.member).has("BAN_MEMBERS") && message.channel.type === 'text'
+    bot.member_Has_KICK_MEMBERS = await message.channel.permissionsFor(message.member).has("KICK_MEMBERS") && message.channel.type === 'text'
+    bot.member_Has_MANAGE_GUILD = await message.channel.permissionsFor(message.member).has("MANAGE_GUILD") && message.channel.type === 'text'
+    bot.member_Has_MANAGE_MESSAGES = await message.channel.permissionsFor(message.member).has("MANAGE_MESSAGES") && message.channel.type === 'text'
+    bot.member_Has_MANAGE_CHANNELS = await message.channel.permissionsFor(message.member).has("MANAGE_CHANNELS") && message.channel.type === 'text'
     //#endregion
 
     Util.SQL_GetResult(Util.db_Model.servers, "ServerID", message, message.member).then(async results => {
-        if (results == null || results == undefined || results == "") return
+        if (results == null || results == undefined || results == "") return;
         /**
          * @param results.ServerID The server ID
          * @param results.ServerLang The server lang
@@ -143,19 +143,29 @@ bot.on("message", async message => {
          */
 
         ServerLang = results.ServerLang
+        bot.ServerLang = results.ServerLang
 
         const server_prefix = await results.ServerPrefix
-            //, cmd = await message.content.slice(config.prefix.length).trim().split(/ +/g).shift()
-            //, args = await message.content.slice(config.prefix.length).trim().split(/ +/g).join(" ").slice(cmd.length + 1).split(" ")
             , server_cmd = await message.content.slice(results.ServerPrefix.length).trim().split(/ +/g).shift()
             , server_args = await message.content.slice(results.ServerPrefix.length).trim().split(/ +/g).join(" ").slice(server_cmd.length + 1).split(" ")
-            //, cmd = message.content.slice(config.prefix.length).trim().split(/ +/g)
             , server_content = await server_args.join(" ");
+
+        //bot.server side
+        bot.server_prefix = await results.ServerPrefix
+            , bot.server_cmd = await message.content.slice(results.ServerPrefix.length).trim().split(/ +/g).shift()
+            , bot.server_args = await message.content.slice(results.ServerPrefix.length).trim().split(/ +/g).join(" ").slice(server_cmd.length + 1).split(" ")
+            , bot.server_content = await server_args.join(" ");
 
         const default_prefix = await config.prefix
             , default_cmd = message.content.slice(default_prefix.length).trim().split(/ +/g).shift()
             , default_args = await message.content.slice(default_prefix.length).trim().split(/ +/g).join(" ").slice(default_cmd.length + 1).split(" ")
             , default_content = await default_args.join(" ");
+
+        //bot.default
+        bot.default_prefix = await config.prefix
+            , bot.default_cmd = message.content.slice(default_prefix.length).trim().split(/ +/g).shift()
+            , bot.default_args = await message.content.slice(default_prefix.length).trim().split(/ +/g).join(" ").slice(default_cmd.length + 1).split(" ")
+            , bot.default_content = await default_args.join(" ");
 
 
         if (message.channel.topic && String(message.channel.topic).includes(":ideas:")) {
@@ -185,7 +195,7 @@ bot.on("message", async message => {
             if (commandFile != null) {
                 if (message.channel.type !== "dm" || (commandFile.help.dm || false)) {
                     commandFile.run(new Call(message, bot, bot.commands, server_args, server_content, server_prefix, server_cmd));
-                } else message.reply(i18n.function(results.ServerLang).Command_Not_Working_In_DM).catch(() => { });
+                } else message.reply(i18n.function(ServerLang).Command_Not_Working_In_DM).catch(() => { });
             }
 
             //IF THE COMMAND IS FROM THE DEFAULT PREFIX THEN
@@ -212,7 +222,7 @@ bot.on("message", async message => {
                 if (message.channel.type !== "dm" || (commandFile.help.dm || false)) {
                     commandFile.run(new Call(message, bot, bot.commands, default_args, default_content, default_prefix, default_cmd));
                 } else {
-                    message.reply(i18n.function(results.ServerLang).Command_Not_Working_In_DM).catch(() => { });
+                    message.reply(i18n.function(ServerLang).Command_Not_Working_In_DM).catch(() => { });
                 }
             }
         }

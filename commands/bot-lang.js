@@ -7,6 +7,7 @@ module.exports = {
     run: async (call) => {
         const Util = require("../Util")
             , Discord = require("discord.js")
+            , config = require("../config")
             , bot = require("../bot")
             , colors = require("colors")
             , message = call.message
@@ -16,6 +17,29 @@ module.exports = {
         }
 
         if (!call.args[0] || call.args[0].toLowerCase() == "help") {
+            Util.SQL_GetResult(Util.db_Model.servers, "ServerID", message, message.member).then(results => {
+                //console.log(results)
+                /**
+                 * @param results.ServerID The server ID
+                 * @param results.ServerLang The server lag
+                 * @param results.ServerName The server name
+                 * @param results.ServerOwnerID The server owner ID
+                 * @param results.ServerPrefix The server prefix
+                 */
+
+                var embed = new Discord.MessageEmbed()
+                    .setColor("ORANGE")
+                    .setAuthor(`The list of commands`, message.member.user.avatarURL)
+                    .setDescription(
+                        `${config.prefix}${call.cmd} **help**: This command\n` +
+                        `${config.prefix}${call.cmd} **show**: Show the current language used\n` +
+                        `${config.prefix}${call.cmd} **set**: Set the language of the bot on this server`
+                    )
+
+                message.channel.send(embed)
+            })
+        } else if (call.args[0].toLowerCase() == "show") {
+
             Util.SQL_GetResult(Util.db_Model.servers, "ServerID", message, message.member).then(results => {
                 console.log(results)
                 /**
@@ -37,6 +61,7 @@ module.exports = {
 
                 message.channel.send(embed)
             })
+
         } else if (call.args[0].toLowerCase() == "set") {
             let _msg = await message.channel.send(`React to this message to define what language the bot should set`)
             await _msg.react("🇫🇷")
@@ -46,11 +71,11 @@ module.exports = {
             const collector = _msg.createReactionCollector(reaction_filter, { time: 60000 })
             collector.on('collect', async r => {
                 //console.log(`Collected ${r.emoji.name}`)
-                await _msg.clearReactions().catch(console.log(`I don't have the permission to remove the reactions ServerID-${message.guild.id}`))
+                await _msg.reactions.removeAll().catch(console.log(`I don't have the permission to remove the reactions ServerID-${message.guild.id}`))
 
                 if (r.emoji.name == "🇫🇷") {
                     _msg.edit(
-                        `Defined the bot language to this server to 🇫🇷`
+                        `Defined the bot language of this server to 🇫🇷`
                     )
                     bot.con.query(`UPDATE ${Util.db_Model.servers} SET ServerLang = 'french' WHERE ServerID = '${message.guild.id}'`, (err, results) => {
                         if (err) { console.error(err) }
@@ -59,7 +84,7 @@ module.exports = {
 
                 } else if (r.emoji.name == "🇺🇸") {
                     _msg.edit(
-                        `Defined the bot language to this server to 🇺🇸`
+                        `Defined the bot language of this server to 🇺🇸`
                     )
                     bot.con.query(`UPDATE ${Util.db_Model.servers} SET ServerLang = 'english' WHERE ServerID = '${message.guild.id}'`, (err, results) => {
                         if (err) { console.error(err) }

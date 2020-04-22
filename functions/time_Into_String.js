@@ -49,7 +49,7 @@ module.exports = {
             time_string = `${time.get("seconds")} ${time_var.s}.`
         }
 
-        console.log(time_string)
+        //console.log(time_string)
         return time_string
     }
 }

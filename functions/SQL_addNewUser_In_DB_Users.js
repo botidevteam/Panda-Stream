@@ -16,7 +16,7 @@ module.exports = {
         }
 
         bot.con.query(`INSERT INTO ${Util.db_Model.users} (userID, UserTwitch, ServerID, ChannelID, Remove_MSG_On_End) VALUES (?, ?, ?, ?, ?)`, [userID, UserTwitch, ServerID, ChannelID, Remove_MSG_On_End], (err, results) => {
-            if (err) return console.log(err)
+            if (err) { return console.log(err); }
 
             console.log(`Successfully added a new user in the DB`)
         });

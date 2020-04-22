@@ -40,7 +40,7 @@ module.exports = {
         let embed_to_send = new Discord.MessageEmbed()
             .setColor("PURPLE")
             .setFooter(`${bot.bot.user.username} ${i18n.function(ServerLang).Announce_Footer_Pub}`, bot.bot.user.avatarURL)
-            .setTimestamp()
+            .setTimestamp();
 
         //For preview : .setThumbnail(dataStream.stream.preview.large)
         //For logo : .setThumbnail(dataStream.stream.channel.logo)
