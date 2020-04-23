@@ -19,7 +19,7 @@ module.exports = {
         if (!call.args[0]) {
             return message.reply("You didn't notice any message to send")
         } else {
-            if (message.deletable) await message.delete(500)
+            if (message.deletable) await message.delete({ timeout: 1 })
             return message.channel.send(call.content)
         }
     }

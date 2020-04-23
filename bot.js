@@ -178,7 +178,7 @@ bot.on("message", async message => {
                 if (String(message.channel.topic).toLowerCase().includes(":nocmds:")) {
                     if (!bot.member_Has_ADMINISTRATOR) {
                         message.author.send(`The channnel ${Util.NotifyChannel(message.channel.id)} have a \`:nocmds:\` tag and you not allowed to send any commands in this channel.`);
-                        return message.delete(1250);
+                        return message.delete({ timeout: 2 });
                     }
                 }
 
@@ -205,7 +205,7 @@ bot.on("message", async message => {
                 if (String(message.channel.topic).toLowerCase().includes(":nocmds:")) {
                     if (!bot.member_Has_ADMINISTRATOR) {
                         message.author.send(`The channnel ${Util.NotifyChannel(message.channel.id)} has a \`:nocmds:\` tag and you not allowed to send any commands in this channel.`);
-                        return message.delete(1250);
+                        return message.delete({ timeout: 2 });
                     }
                 }
             }

@@ -32,7 +32,7 @@ module.exports = {
         else if (NumberToDelete >= 100) NumberToDelete = 100
 
         await message.react(Util.EmojiGreenTickString)
-        await message.delete(2000)
+        await message.delete({ timeout: 2 })
 
         setTimeout(async () => {
             message.channel.fetchMessages({ limit: NumberToDelete })

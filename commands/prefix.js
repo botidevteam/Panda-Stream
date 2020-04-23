@@ -48,9 +48,9 @@ module.exports = {
                     .setFooter(`Command Requested by ${message.member.user.tag}`)
 
                 if (!call.args[0] || call.args[0] === "help") {
-                    message.react(Util.EmojiGreenTickString).then(() => message.delete(5000))
+                    message.react(Util.EmojiGreenTickString).then(() => message.delete({ timeout: 5 }))
                     //message.channel.send(embed)
-                    message.react(Util.EmojiGreenTickString).then(() => message.delete(5000))
+                    message.react(Util.EmojiGreenTickString).then(() => message.delete({ timeout: 5 }))
 
                     /*
                     embed_help.setDescription(`To set the prefix use:\n`+
@@ -69,19 +69,19 @@ module.exports = {
                 } else {
                     if (call.args[0] === "set") {
                         if (!call.args[1]) {
-                            message.react(Util.EmojiRedTickString).then(() => message.delete(5000))
+                            message.react(Util.EmojiRedTickString).then(() => message.delete({ timeout: 5 }))
                             embed_message_warn
                                 .setDescription(`You forgot to put the new prefix of the server!`)
                             message.channel.send(embed_message_warn).then(msg => Util.deleteMyMessage(msg, 10000))
                         } else {
                             if (call.args[1].length <= 1) {
-                                message.react(Util.EmojiRedTickString).then(() => message.delete(5000))
+                                message.react(Util.EmojiRedTickString).then(() => message.delete({ timeout: 5 }))
                                 embed_message_warn
                                     .setDescription(`You can't put a prefix smaller than 1 caracters !`)
                                 message.channel.send(embed_message_warn).then(msg => Util.deleteMyMessage(msg, 10000))
 
                             } else if (call.args[1].length >= 10) {
-                                message.react(Util.EmojiRedTickString).then(() => message.delete(5000))
+                                message.react(Util.EmojiRedTickString).then(() => message.delete({ timeout: 5 }))
                                 embed_message_warn
                                     .setDescription(`You can't put a prefix bigger than 10 caracters !`)
                                 message.channel.send(embed_message_warn).then(msg => Util.deleteMyMessage(msg, 10000))
@@ -98,11 +98,11 @@ module.exports = {
                         }
 
                     } else if (call.args[0] === "show") {
-                        message.react(Util.EmojiGreenTickString).then(() => message.delete(5000))
+                        message.react(Util.EmojiGreenTickString).then(() => message.delete({ timeout: 5 }))
                         message.channel.send(embed);
 
                     } else if (call.args[0] === "reset") {
-                        message.react(Util.EmojiGreenTickString).then(() => message.delete(5000))
+                        message.react(Util.EmojiGreenTickString).then(() => message.delete({ timeout: 5 }))
                         call.bot.con.query(`UPDATE ${Util.db_Model.servers} SET ServerPrefix = '${config.prefix}' WHERE ServerID = '${message.guild.id}'`, (error, res) => {
                             if (error) { return message.channel.send(Util.errorMessage(error, "prefix")); }
                             else {

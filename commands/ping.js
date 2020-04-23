@@ -25,7 +25,7 @@ module.exports = {
         embed.setDescription(`\n:ping_pong: ${Math.round((msg_embed.createdTimestamp - message.createdTimestamp))} ms`);
         await msg_embed.edit(embed);
         //message.delete(5000)
-        message.delete({ timeout: 5000 });
+        message.delete({ timeout: 5 });
 
 
         //msg_embed.delete(6000)
