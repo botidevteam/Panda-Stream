@@ -12,7 +12,7 @@
     "discord.js": "^12.2.0",
     "fs": "0.0.1-security",
     "moment": "2.24.0",
-    "mysql2": "^3.9.4",
+    "mysql2": "^3.9.7",
     "node-opus": "^0.3.3",
     "twitch.tv-api": "^1.2.4"
   }
